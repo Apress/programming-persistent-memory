@@ -17,3 +17,13 @@ tmpfs                             188G   36K  188G   1% /tmp
 tmpfs                              38G     0   38G   0% /run/user/0
 /dev/pmem0                        1.5T   77M  1.4T   1% /mnt/pmemfs0
 /dev/pmem1                        1.5T   77M  1.4T   1% /mnt/pmemfs1
+
+###
+### We can filter the output to look specifically at the pmem devices 
+###  without using grep, eg:
+###
+
+$ df -h /dev/pmem*
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/pmem0      1.5T   77M  1.4T   1% /mnt/pmemfs0
+/dev/pmem1      1.5T   77M  1.4T   1% /mnt/pmemfs1
