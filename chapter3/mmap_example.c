@@ -80,7 +80,8 @@ main(int argc, char *argv[])
 	 * Use MAP_SHARED|MAP_SYNC for pmem so stores are visible
 	 * to other programs and flushing from user space is safe.
 	 */
-	if ((pmaddr = mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_SHARED,
+	if ((pmaddr = mmap(NULL, 4096, PROT_READ|PROT_WRITE,
+					MAP_SHARED|MAP_SYNC,
 					fd, 0)) == MAP_FAILED)
 		err(1, "mmap %s", argv[1]);
 
