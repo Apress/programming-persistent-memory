@@ -1,0 +1,28 @@
+###
+### List namespaces with human readable sizes
+### Executed as a non-root user
+###
+
+$ ndctl list -u
+[
+  {
+    "dev":"namespace1.0",
+    "mode":"fsdax",
+    "map":"dev",
+    "size":"1488.37 GiB (1598.13 GB)",
+    "uuid":"b45584b5-b0ff-4d48-af20-468d2a1b531a",
+    "sector_size":512,
+    "align":2097152,
+    "blockdev":"pmem1"
+  },
+  {
+    "dev":"namespace0.0",
+    "mode":"fsdax",
+    "map":"dev",
+    "size":"1488.37 GiB (1598.13 GB)",
+    "uuid":"2f373b37-d9b3-48e3-a2e4-472462d884ce",
+    "sector_size":512,
+    "align":2097152,
+    "blockdev":"pmem0"
+  }
+]
