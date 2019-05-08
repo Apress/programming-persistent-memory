@@ -77,12 +77,11 @@ main(int argc, char *argv[])
 
 	/*
 	 * Map the file into our address space for read & write.
-	 * Use MAP_SHARED|MAP_SYNC for pmem so stores are visible
-	 * to other programs and flushing from user space is safe.
+	 * Use MAP_SHARED so stores are visible to other programs.
 	 */
-	if ((pmaddr = mmap(NULL, stbuf.st_size, PROT_READ|PROT_WRITE,
-					MAP_SHARED|MAP_SYNC,
-					fd, 0)) == MAP_FAILED)
+	if ((pmaddr = mmap(NULL, stbuf.st_size,
+				PROT_READ|PROT_WRITE,
+				MAP_SHARED, fd, 0)) == MAP_FAILED)
 		err(1, "mmap %s", argv[1]);
 
 	/* don't need the fd anymore, the mapping stays around */
