@@ -15,8 +15,9 @@ main(int argc, char *argv[])
 		fprintf(stderr, "Usage: %s filename\n", argv[0]);
 		exit(1);
 	}
-	HANDLE fh = INVALID_HANDLE_VALUE;
-	if ((fh = CreateFileA(argv[1],
+
+	/* Create the file or open if the file already exists */
+	if ((fh = CreateFile(argv[1],
 		GENERIC_READ | GENERIC_WRITE,
 		0,
 		NULL,
@@ -27,6 +28,8 @@ main(int argc, char *argv[])
 			GetLastError());
 		exit(1);
 	}
+
+	/* why are we doing this????  */
 	DWORD filelen = GetFileSize(fh, NULL);
 	if (filelen == 0) {
 		fprintf(stderr, "GetFileSize, gle: 0x%08x",
@@ -34,11 +37,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/*
-	 * Map the file into our address space for read & write.
-	 * Use MAP_SHARED|MAP_SYNC for pmem so stores are visible
-	 * to other programs and flushing from user space is safe.
-	 */
+	/* Create a file mapping object */
 	HANDLE fmh = CreateFileMapping(fh,
 		NULL, /* security attributes */
 		PAGE_READWRITE,
@@ -52,6 +51,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Map into our address space and get a pointer to the beginning */
 	pmaddr = (char *)MapViewOfFileEx(fmh,
 		FILE_MAP_ALL_ACCESS,
 		0,
@@ -65,14 +65,13 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/* don't need the fd anymore, the mapping stays around */
-	// close(fd); on windows we can not close file handle when file is mmaped
+	/* On windows we can not close file handle when file is mmaped */
 
 	/* store a string to the Persistent Memory */
 	strcpy(pmaddr, "Hello, Persistent Memory!");
 
 	/*
-	* Simplest way to flush is to call msync(). The length
+	* Insure changes are flushed to storage. The length
 	* needs to be rounded up to a 4k page.
 	*/
 	if (FlushViewOfFile(pmaddr, 4096) == FALSE) {
@@ -81,6 +80,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Do we need this since we explicitly flushed the modified page???? */
 	if (FlushFileBuffers(fh) == FALSE) {
 		fprintf(stderr, "FlushFileBuffers, gle: 0x%08x",
 			GetLastError());
