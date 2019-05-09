@@ -1,0 +1,45 @@
+     1	#include <sys/types.h>
+     2	#include <sys/stat.h>
+     3	#include <fcntl.h>
+     4	#include <stdio.h>
+     5	#include <errno.h>
+     6	#include <stdlib.h>
+     7	#ifndef _WIN32
+     8	#include <unistd.h>
+     9	#else
+    10	#include <io.h>
+    11	#endif
+    12	#include <string.h>
+    13	#include <libpmem.h>
+    14	
+    15	/* using 4k of pmem for this example */
+    16	#define PMEM_LEN 4096
+    17	
+    18	#define PATH "/pmem-fs/myfile"
+    19	
+    20	int
+    21	main(int argc, char *argv[])
+    22	{
+    23		char *pmemaddr;
+    24		size_t mapped_len;
+    25		int is_pmem;
+    26	
+    27		/* create a pmem file and memory map it */
+    28		if ((pmemaddr = pmem_map_file(PATH, PMEM_LEN, PMEM_FILE_CREATE,
+    29					0666, &mapped_len, &is_pmem)) == NULL) {
+    30			perror("pmem_map_file");
+    31			exit(1);
+    32		}
+    33	
+    34		/* store a string to the persistent memory */
+    35		strcpy(pmemaddr, "hello, persistent memory");
+    36	
+    37		/* flush above strcpy to persistence */
+    38		if (is_pmem)
+    39			pmem_persist(pmemaddr, mapped_len);
+    40		else
+    41			pmem_msync(pmemaddr, mapped_len);
+    42	
+    43		/* Delete the mappings. The region is also */
+    44		pmem_unmap(pmemaddr, mapped_len);
+    45	}
