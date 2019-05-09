@@ -1,3 +1,34 @@
+/*
+ * Copyright (c) 2019, Intel Corporation
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in
+ *       the documentation and/or other materials provided with the
+ *       distribution.
+ *
+ *     * Neither the name of Intel Corporation nor the names of its
+ *       contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,12 +55,12 @@ main(int argc, char *argv[])
 		OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL,
 		NULL)) == INVALID_HANDLE_VALUE) {
-		fprintf(stderr, "CreateFileA, gle: 0x%08x",
+		fprintf(stderr, "CreateFile, gle: 0x%08x",
 			GetLastError());
 		exit(1);
 	}
 
-	/* why are we doing this????  */
+	/* Get the file length for use when memory mapping later */
 	DWORD filelen = GetFileSize(fh, NULL);
 	if (filelen == 0) {
 		fprintf(stderr, "GetFileSize, gle: 0x%08x",
@@ -65,30 +96,26 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/* On windows we can not close file handle when file is mmaped */
+	/* On windows must leave the file handle(s) open while mmaped */
 
-	/* store a string to the Persistent Memory */
-	strcpy(pmaddr, "Hello, Persistent Memory!");
+	/* store a string to the beginning of the file  */
+	strcpy(pmaddr, "This is new data written to the file");
 
-	/*
-	* Insure changes are flushed to storage. The length
-	* needs to be rounded up to a 4k page.
-	*/
+	/* Flush this page with length rounded up to 4k page size */
 	if (FlushViewOfFile(pmaddr, 4096) == FALSE) {
 		fprintf(stderr, "FlushViewOfFile, gle: 0x%08x",
 			GetLastError());
 		exit(1);
 	}
 
-	/* Do we need this since we explicitly flushed the modified page???? */
+	/* Now flush the complete file to backing storage */
 	if (FlushFileBuffers(fh) == FALSE) {
 		fprintf(stderr, "FlushFileBuffers, gle: 0x%08x",
 			GetLastError());
 		exit(1);
 	}
 
-	printf("Done.\n");
-
+	/* Explicitly unmap before closing the file */
 	if (UnmapViewOfFile(pmaddr) == FALSE) {
 		fprintf(stderr, "UnmapViewOfFile, gle: 0x%08x", GetLastError());
 		exit(1);
@@ -96,6 +123,8 @@ main(int argc, char *argv[])
 
 	CloseHandle(fmh);
 	CloseHandle(fh);
+
+	printf("Done.\n");
 
 	exit(0);
 }
