@@ -88,7 +88,7 @@ main(int argc, char *argv[])
 	close(fd);
 
 	/* store a string to the Persistent Memory */
-	strcpy(pmaddr, "Hello, Persistent Memory!");
+	strcpy(pmaddr, "This is new data written to the file");
 
 	/*
 	 * Simplest way to flush is to call msync(). The length
