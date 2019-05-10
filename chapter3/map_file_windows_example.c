@@ -29,6 +29,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/*
+ * map_file_windows_example.c -- windows memory mapped file example
+ *
+ * This file memory-maps a file and stores a string to it.  It is
+ * a quick example of how to use MapViewOfFileEx() and how to flush
+ * changes to the file.
+ *
+ * To run this example, provide a single argument, which is the name of
+ * a test file that is at least 4k in length.  This program will overwrite
+ * the file contents!
+ */
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -117,7 +130,8 @@ main(int argc, char *argv[])
 
 	/* Explicitly unmap before closing the file */
 	if (UnmapViewOfFile(pmaddr) == FALSE) {
-		fprintf(stderr, "UnmapViewOfFile, gle: 0x%08x", GetLastError());
+		fprintf(stderr, "UnmapViewOfFile, gle: 0x%08x",
+			GetLastError());
 		exit(1);
 	}
 
@@ -125,6 +139,5 @@ main(int argc, char *argv[])
 	CloseHandle(fh);
 
 	printf("Done.\n");
-
 	exit(0);
 }

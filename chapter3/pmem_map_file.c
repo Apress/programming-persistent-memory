@@ -56,22 +56,31 @@ main(int argc, char *argv[])
 	size_t mapped_len;
 	int is_pmem;
 
-	/* create a pmem file and memory map it */
-	if ((pmemaddr = pmem_map_file(PATH, PMEM_LEN, PMEM_FILE_CREATE,
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s filename\n", argv[0]);
+		exit(1);
+	}
+
+	/* Create a pmem file and memory map it. */
+	if ((pmemaddr = pmem_map_file(argv[1], PMEM_LEN, PMEM_FILE_CREATE,
 				0666, &mapped_len, &is_pmem)) == NULL) {
 		perror("pmem_map_file");
 		exit(1);
 	}
 
-	/* store a string to the persistent memory */
-	strcpy(pmemaddr, "hello, persistent memory");
+	/* Store a string to the persistent memory. */
+	char s[] = "This is new data written to the file";
+	strcpy(pmemaddr, s);
 
-	/* flush our string to persistence */
+	/* Flush our string to persistence. */
 	if (is_pmem)
-		pmem_persist(pmemaddr, mapped_len);
+		pmem_persist(pmemaddr, sizeof(s));
 	else
-		pmem_msync(pmemaddr, mapped_len);
+		pmem_msync(pmemaddr, sizeof(s));
 
 	/* Delete the mappings. */
 	pmem_unmap(pmemaddr, mapped_len);
+
+	printf("Done.\n");
+	exit(0);
 }
