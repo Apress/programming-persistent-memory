@@ -29,28 +29,25 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Makefile for chapter3 examples
+# Makefile for chapter1 examples
 #
 
 .SUFFIXES: .lst
 
-all: mmap_example pmem_map_file listings
+all: pmemkv listings
 
-listings: mmap_example.lst pmem_map_file.lst map_file_windows_example.lst
+listings: pmemkv.lst
 
-.c.lst:
+.cc.lst:
 	cat -n $^ > $@
 
-mmap_example: mmap_example.c
-	$(CC) -o mmap_example mmap_example.c
-
-pmem_map_file: pmem_map_file.c
-	$(CC) -o pmem_map_file pmem_map_file.c -lpmem
+pmemkv: pmemkv.cc
+	$(CXX) -o pmemkv pmemkv.cc -lpmemkv
 
 clean:
-	$(RM) *.o core a.out testfile
+	$(RM) *.o core a.out
 
 clobber: clean
-	$(RM) mmap_example pmem_map_file *.lst
+	$(RM) pmemkv *.lst
 
 .PHONY: all clean clobber listings
