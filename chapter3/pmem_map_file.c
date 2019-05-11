@@ -46,9 +46,6 @@
 /* using 4k of pmem for this example */
 #define PMEM_LEN 4096
 
-/* define the filename for our example pmem region  */
-#define PATH "/pmem-fs/myfile"
-
 int
 main(int argc, char *argv[])
 {
