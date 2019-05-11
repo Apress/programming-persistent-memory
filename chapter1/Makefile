@@ -38,7 +38,7 @@ all: pmemkv listings
 
 listings: pmemkv.lst
 
-.cc.lst:
+%.lst: %.c
 	cat -n $^ > $@
 
 pmemkv: pmemkv.cc
