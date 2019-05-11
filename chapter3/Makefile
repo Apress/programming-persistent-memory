@@ -38,7 +38,7 @@ all: mmap_example pmem_map_file listings
 
 listings: mmap_example.lst pmem_map_file.lst map_file_windows_example.lst
 
-.c.lst:
+%.lst: %.c
 	cat -n $^ > $@
 
 mmap_example: mmap_example.c
