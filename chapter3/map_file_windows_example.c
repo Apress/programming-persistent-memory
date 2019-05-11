@@ -53,21 +53,21 @@
 int
 main(int argc, char *argv[])
 {
-	char *pmaddr;
-
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s filename\n", argv[0]);
 		exit(1);
 	}
 
 	/* Create the file or open if the file already exists */
-	if ((fh = CreateFile(argv[1],
-		GENERIC_READ | GENERIC_WRITE,
+	HANDLE fh = CreateFile(argv[1],
+		GENERIC_READ|GENERIC_WRITE,
 		0,
 		NULL,
 		OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL,
-		NULL)) == INVALID_HANDLE_VALUE) {
+		NULL);
+
+	if (fh == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "CreateFile, gle: 0x%08x",
 			GetLastError());
 		exit(1);
@@ -96,7 +96,7 @@ main(int argc, char *argv[])
 	}
 
 	/* Map into our address space and get a pointer to the beginning */
-	pmaddr = (char *)MapViewOfFileEx(fmh,
+	char *pmaddr = (char *)MapViewOfFileEx(fmh,
 		FILE_MAP_ALL_ACCESS,
 		0,
 		0,
