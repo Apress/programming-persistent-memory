@@ -32,11 +32,11 @@ CC = gcc
 CXX = g++
 RM = rm -f
 
-C_TARGETS = leak stackoverflow listing_8-9 listing_8-11 listing_8-13 listing_8-16 listing_8-17 listing_8-17 listing_8-23 listing_8-25 listing_8-28 listing_8-33 listing_8-36 listing_8-38 listing_8-40
+TARGETS=leak stackoverflow listing_8-9 listing_8-11 listing_8-13 listing_8-16 listing_8-17 listing_8-17 listing_8-23 listing_8-25 listing_8-28 listing_8-33 listing_8-36 listing_8-38 listing_8-40 listing_8-44 listing_8-45 listing_8-48 listing_8-51
+TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
 
-CXX_TARGETS = listing_8-44 listing_8-45 listing_8-48 listing_8-51
-
-all: $(C_TARGETS) $(CXX_TARGETS)
+all: $(TARGETS) listings
+listings: $(TARGETS_LISTINGS)
 
 %: %.c
 	$(CC) -g -o $@ $< -lpthread -lpmemobj
@@ -44,5 +44,11 @@ all: $(C_TARGETS) $(CXX_TARGETS)
 %: %.cpp
 	$(CXX) -g -o $@ $< -lpthread -lpmemobj -std=c++11
 
+%.lst: %.c
+	cat -n $^ > $@
+
+%.lst: %.cpp
+	cat -n $^ > $@
+
 clean:
-	$(RM) $(C_TARGETS) $(CXX_TARGETS)
+	$(RM) $(TARGETS) $(TARGETS_LISTINGS)
