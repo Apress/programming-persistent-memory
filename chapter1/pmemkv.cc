@@ -35,9 +35,13 @@
  */
 
 #include <iostream>
-#include "libpmemkv.h"
+#include <cassert>
+#include "libpmemkv.hpp"
 
-using namespace pmemkv;
+using namespace pmem::kv; 
+
+const std::string PATH = "/daxfs/kvfile"; 
+const uint64_t SIZE = ((uint64_t)(1024 * 1024 * 1024)); 
 
 /*
  * kvprint -- print a single key-value pair
@@ -46,26 +50,38 @@ void kvprint(const string& k, const string& v) {
     std::cout << "key: " << k << ", value: " << v << "\n";
 }
 
-int main() {
+int main() { 
 
-    // Create a key-value store using the "cmap" engine.
-    KVEngine* kv = KVEngine::Start("cmap",
-		    "{ \"path\" : \"/daxfs/kvfile\" }");
+    pmemkv_config *cfg = pmemkv_config_new(); 
+    assert(cfg != nullptr); 
 
-    // add some keys and values
-    KVStatus s;
-    s = kv->Put("key1", "value1");
-    assert(s == OK);
-    s = kv->Put("key2", "value2");
-    assert(s == OK);
-    s = kv->Put("key3", "value3");
-    assert(s == OK);
+    int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str()); 
+    assert(ret == PMEMKV_STATUS_OK); 
 
-    // iterate through the key-value store
-    kv->Each(kvprint);
+    ret = pmemkv_config_put_uint64(cfg, "size", SIZE); 
+    assert(ret == PMEMKV_STATUS_OK); 
 
-    // Stop the engine.
-    delete kv;
+    // Create a key-value store using the "cmap" engine. 
+    db *kv = new db(); 
+    assert(kv != nullptr); 
 
-    return 0;
-}
+    status s = kv->open("cmap", cfg); 
+    assert(s == status::OK);   
+
+    // add some keys and values 
+    status s; 
+    s = kv->put("key1", "value1"); 
+    assert(s == status::OK); 
+    s = kv->put("key2", "value2"); 
+    assert(s == status::OK); 
+    s = kv->put("key3", "value3"); 
+    assert(s == status::OK); 
+
+    // iterate through the key-value store 
+    kv->get_all(kvprint); 
+
+    // Stop the engine. 
+    delete kv; 
+
+    return 0; 
+} 
