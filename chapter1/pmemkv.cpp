@@ -43,7 +43,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-const string PATH = "/daxfs/kvfile";
+auto PATH = "/daxfs/kvfile";
 
 const uint64_t SIZE = 1024 * 1024 * 1024;  // 1 Gig
 
@@ -60,7 +60,7 @@ int main() {
     pmemkv_config *cfg = pmemkv_config_new();
     assert(cfg != nullptr);
 
-    int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str());
+    int ret = pmemkv_config_put_string(cfg, "path", PATH);
     assert(ret == PMEMKV_STATUS_OK);
 
     ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
