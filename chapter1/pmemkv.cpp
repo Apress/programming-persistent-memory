@@ -31,19 +31,19 @@
  */
 
 /*
- * pmemkv.cc -- demo a persistent memory key-value store
+ * pmemkv.cpp -- demo a persistent memory key-value store
  */
 
 #include <iostream>
 #include <cassert>
 #include <libpmemkv.hpp>
 
-using namespace pmem::kv; 
+using namespace pmem::kv;
 using std::cout;
 using std::endl;
 using std::string;
 
-const string PATH = "/pmem/kvfile"; 
+const string PATH = "/daxfs/kvfile";
 
 const uint64_t SIZE = 1024 * 1024 * 1024;  // 1 Gig
 
@@ -55,40 +55,40 @@ int kvprint(string_view k, string_view v) {
     return 0;
 }
 
-int main() { 
+int main() {
 
-    pmemkv_config *cfg = pmemkv_config_new(); 
-    assert(cfg != nullptr); 
+    pmemkv_config *cfg = pmemkv_config_new();
+    assert(cfg != nullptr);
 
-    int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str()); 
-    assert(ret == PMEMKV_STATUS_OK); 
+    int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str());
+    assert(ret == PMEMKV_STATUS_OK);
 
     ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
     assert(ret == PMEMKV_STATUS_OK);
 
-    ret = pmemkv_config_put_uint64(cfg, "size", SIZE); 
-    assert(ret == PMEMKV_STATUS_OK); 
+    ret = pmemkv_config_put_uint64(cfg, "size", SIZE);
+    assert(ret == PMEMKV_STATUS_OK);
 
-    // Create a key-value store using the "cmap" engine. 
-    db *kv = new db(); 
-    assert(kv != nullptr); 
+    // Create a key-value store using the "cmap" engine.
+    db *kv = new db();
+    assert(kv != nullptr);
 
-    status s = kv->open("cmap", cfg); 
-    assert(s == status::OK);   
+    status s = kv->open("cmap", cfg);
+    assert(s == status::OK);
 
-    // add some keys and values 
-    s = kv->put("key1", "value1"); 
-    assert(s == status::OK); 
-    s = kv->put("key2", "value2"); 
-    assert(s == status::OK); 
-    s = kv->put("key3", "value3"); 
-    assert(s == status::OK); 
+    // add some keys and values
+    s = kv->put("key1", "value1");
+    assert(s == status::OK);
+    s = kv->put("key2", "value2");
+    assert(s == status::OK);
+    s = kv->put("key3", "value3");
+    assert(s == status::OK);
 
-    // iterate through the key-value store 
-    kv->get_all(kvprint); 
+    // iterate through the key-value store
+    kv->get_all(kvprint);
 
-    // Stop the engine. 
-    delete kv; 
+    // Stop the engine.
+    delete kv;
 
-    return 0; 
-} 
+    return 0;
+}
