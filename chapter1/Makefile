@@ -38,11 +38,11 @@ all: pmemkv listings
 
 listings: pmemkv.lst
 
-%.lst: %.cc
+%.lst: %.cpp
 	cat -n $^ > $@
 
-pmemkv: pmemkv.cc
-	$(CXX) -o pmemkv pmemkv.cc -lpmemkv
+pmemkv: pmemkv.cpp
+	$(CXX) -o pmemkv pmemkv.cpp -lpmemkv
 
 clean:
 	$(RM) *.o core a.out

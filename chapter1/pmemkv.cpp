@@ -36,18 +36,23 @@
 
 #include <iostream>
 #include <cassert>
-#include "libpmemkv.hpp"
+#include <libpmemkv.hpp>
 
 using namespace pmem::kv; 
+using std::cout;
+using std::endl;
+using std::string;
 
-const std::string PATH = "/daxfs/kvfile"; 
-const uint64_t SIZE = ((uint64_t)(1024 * 1024 * 1024)); 
+const string PATH = "/pmem/kvfile"; 
+
+const uint64_t SIZE = 1024 * 1024 * 1024;  // 1 Gig
 
 /*
  * kvprint -- print a single key-value pair
  */
-void kvprint(const string& k, const string& v) {
-    std::cout << "key: " << k << ", value: " << v << "\n";
+int kvprint(string_view k, string_view v) {
+    cout << "key: " << k.data() << ", value: " << v.data() << endl;
+    return 0;
 }
 
 int main() { 
@@ -57,6 +62,9 @@ int main() {
 
     int ret = pmemkv_config_put_string(cfg, "path", PATH.c_str()); 
     assert(ret == PMEMKV_STATUS_OK); 
+
+    ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
+    assert(ret == PMEMKV_STATUS_OK);
 
     ret = pmemkv_config_put_uint64(cfg, "size", SIZE); 
     assert(ret == PMEMKV_STATUS_OK); 
@@ -69,7 +77,6 @@ int main() {
     assert(s == status::OK);   
 
     // add some keys and values 
-    status s; 
     s = kv->put("key1", "value1"); 
     assert(s == status::OK); 
     s = kv->put("key2", "value2"); 
