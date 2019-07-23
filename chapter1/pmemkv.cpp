@@ -39,6 +39,7 @@
 #include <libpmemkv.hpp>
 
 using namespace pmem::kv;
+using std::cerr;
 using std::cout;
 using std::endl;
 using std::string;
@@ -60,29 +61,43 @@ int main() {
     pmemkv_config *cfg = pmemkv_config_new();
     assert(cfg != nullptr);
 
-    int ret = pmemkv_config_put_string(cfg, "path", PATH);
-    assert(ret == PMEMKV_STATUS_OK);
+    if (pmemkv_config_put_string(cfg, "path", PATH) != PMEMKV_STATUS_OK) {
+        cerr << pmemkv_errormsg() << endl;
+        return 1;
+    }
 
-    ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
-    assert(ret == PMEMKV_STATUS_OK);
+    if (pmemkv_config_put_uint64(cfg, "force_create", 1) != PMEMKV_STATUS_OK) {
+        cerr << pmemkv_errormsg() << endl;
+        return 1;
+    }
 
-    ret = pmemkv_config_put_uint64(cfg, "size", SIZE);
-    assert(ret == PMEMKV_STATUS_OK);
+    if (pmemkv_config_put_uint64(cfg, "size", SIZE) != PMEMKV_STATUS_OK) {
+        cerr << pmemkv_errormsg() << endl;
+        return 1;
+    }
 
     // Create a key-value store using the "cmap" engine.
     db *kv = new db();
     assert(kv != nullptr);
 
-    status s = kv->open("cmap", cfg);
-    assert(s == status::OK);
+    if (kv->open("cmap", cfg) != status::OK) {
+        cerr << db::errormsg() << endl;
+        return 1;
+    }
 
     // add some keys and values
-    s = kv->put("key1", "value1");
-    assert(s == status::OK);
-    s = kv->put("key2", "value2");
-    assert(s == status::OK);
-    s = kv->put("key3", "value3");
-    assert(s == status::OK);
+    if (kv->put("key1", "value1") != status::OK) {
+        cerr << db::errormsg() << endl;
+        return 1;
+    }
+    if (kv->put("key2", "value2") != status::OK) {
+        cerr << db::errormsg() << endl;
+        return 1;
+    }
+    if (kv->put("key3", "value3") != status::OK) {
+        cerr << db::errormsg() << endl;
+        return 1;
+    }
 
     // iterate through the key-value store
     kv->get_all(kvprint);
