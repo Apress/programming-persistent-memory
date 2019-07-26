@@ -30,49 +30,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- /*
-  * consistency_checksum.c - example of using checksum to guarantee
-  * consistency
-  */
+#include <libpmemobj++/experimental/string.hpp>
 
-#include <assert.h>
-#include <libpmemobj.h>
-
-struct cachelines {
-	char A[64];
-	char B[64];
-};
-
-struct my_data {
-	struct cachelines cachelines;
-	uint64_t checksum;
-	char padding[56];
-};
-
-uint64_t checksum_calc(struct cachelines *cachelines) {
-	uint64_t checksum = 0;
-
-	/* calculate actual checksum */
-
-	return checksum;
-}
-
-int main()
+namespace pmem
 {
-	PMEMobjpool *pop = pmemobj_create("pmpool", "chksum",
-					  PMEMOBJ_MIN_POOL, 0666);
-
-	PMEMoid root = pmemobj_root(pop, sizeof(struct my_data));
-	struct my_data *data = pmemobj_direct(root);
-
-	struct my_data stack_data;
-	memset(stack_data.cachelines.A, 0xC, 64);
-	memset(stack_data.cachelines.B, 0xD, 64);
-	stack_data.checksum = checksum_calc(&stack_data.cachelines);
-	pmemobj_memcpy(pop, data, &stack_data, sizeof(stack_data),
-		       PMEMOBJ_F_MEM_NONTEMPORAL);
-
-	pmemobj_close(pop);
-
-	return 0;
+namespace obj
+{
+	using string = experimental::string;
+}
 }

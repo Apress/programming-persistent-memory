@@ -34,23 +34,28 @@
 
 .SUFFIXES: .lst
 
-all: consistency_flag consistency_checksum listings
+PROGS = data_oriented_design simplekv simplekv_rebuild
 
-listings: b+tree_insert.lst consistency_flag.lst consistency_checksum.lst
+all: $(PROGS) listings
+
+listings: b+tree_insert.lst simplekv.lst simplekv_rebuild.lst data_oriented_design.lst
 
 %.lst: %.c*
 	cat -n $^ > $@
 
-consistency_flag: consistency_flag.c
-	$(CC) -o consistency_flag consistency_flag.c -lpmemobj
+simplekv: simplekv.cpp
+	$(CXX) -o simplekv simplekv.cpp -lpmemobj
 
-consistency_checksum: consistency_checksum.c
-	$(CC) -o consistency_checksum consistency_checksum.c -lpmemobj
+simplekv_rebuild: simplekv_rebuild.cpp
+	$(CXX) -o simplekv_rebuild simplekv_rebuild.cpp -lpmemobj
+
+data_oriented_design: data_oriented_design.cpp
+	$(CXX) -o data_oriented_design data_oriented_design.cpp -lpmemobj
 
 clean:
-	$(RM) *.o core a.out
+	$(RM) $(PROGS) *.o core a.out
 
 clobber: clean
-	$(RM) consistency_flag consistency_checksum *.lst
+	$(RM) data_oriented_design simplekv simplekv_rebuild *.lst
 
 .PHONY: all clean clobber listings

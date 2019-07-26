@@ -30,34 +30,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- /*
-  * consistency_flag.c - example of using flag value to gurantee consistency
-  */
+#include <libpmemobj++/experimental/vector.hpp>
 
-#include <assert.h>
-#include <libpmemobj.h>
-
-struct my_data {
-	char cacheline_A[64];
-	char cacheline_B[64];
-	int persistent;
-};
-
-int main()
+namespace pmem
 {
-	PMEMobjpool *pop = pmemobj_create("pmpool", "cflag",
-					  PMEMOBJ_MIN_POOL, 0666);
-
-	PMEMoid root = pmemobj_root(pop, sizeof(struct my_data));
-	struct my_data *data = pmemobj_direct(root);
-
-	pmemobj_memset(pop, data->cacheline_A, 0xC, 64, PMEMOBJ_F_MEM_NODRAIN);
-	pmemobj_memset(pop, data->cacheline_B, 0xD, 64, PMEMOBJ_F_MEM_NODRAIN);
-	pmemobj_drain(pop);
-	data->persistent = 1;
-	pmemobj_persist(pop, &data->persistent, sizeof(data->persistent));
-
-	pmemobj_close(pop);
-
-	return 0;
+namespace obj
+{
+	template <typename T>
+	using vector = experimental::array<T>;
+}
 }
