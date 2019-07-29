@@ -40,7 +40,16 @@ all: $(PROGS) listings
 
 listings: b+tree_insert.lst simplekv.lst simplekv_rebuild.lst data_oriented_design.lst
 
-%.lst: %.c*
+b+tree_insert.lst: b+tree_insert.cpp
+	cat -n $^ > $@
+
+simplekv.lst: simplekv.hpp
+	cat -n $^ > $@
+
+simplekv_rebuild.lst: simplekv_rebuild.hpp
+	cat -n $^ > $@
+
+data_oriented_design.lst: data_oriented_design.cpp
 	cat -n $^ > $@
 
 simplekv: simplekv.cpp
@@ -53,9 +62,9 @@ data_oriented_design: data_oriented_design.cpp
 	$(CXX) -o data_oriented_design data_oriented_design.cpp -lpmemobj
 
 clean:
-	$(RM) $(PROGS) *.o core a.out
+	$(RM) *.o core a.out
 
 clobber: clean
-	$(RM) data_oriented_design simplekv simplekv_rebuild *.lst
+	$(RM) $(PROGS) *.lst
 
 .PHONY: all clean clobber listings
