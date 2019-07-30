@@ -41,25 +41,25 @@ function assert(condition) {
 }
 
 console.log('Create a key-value store using the "cmap" engine');
-const db = new Database('cmap', '{"path":"dupadupa","size":1073741824, "force_create":1}');
+const db = new Database('cmap', '{"path":"/daxfs/kvfile","size":1073741824, "force_create":1}');
 
-console.log('add 2 entries with name and phone number');
+console.log('Add 2 entries with name and phone number');
 db.put('John', '123-456-789');
 db.put('Kate', '987-654-321');
 
-console.log('count elements');
+console.log('Count elements');
 assert(db.count_all == 2);
 
 console.log('Reading key back');
 assert(db.get('John') === '123-456-789');
 
-console.log('iterate through the phonebook');
-db.get_all((k, v) => console.log(`  name: ${k}, number: ${v}`));
+console.log('Iterate through the phonebook');
+db.get_all((k, v) => console.log(`name: ${k}, number: ${v}`));
 
-console.log('removal');
+console.log('Remove element');
 db.remove('John');
 
-console.log('lookup');
+console.log('Lookup');
 assert(!db.exists('John'));
 
 console.log('Stopping engine');
