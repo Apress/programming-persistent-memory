@@ -43,7 +43,6 @@ template <typename Key, typename Value, uint64_t slots>
 class leaf_node_t {
 public:
         using key_type = Key;
-        using value_type = Value;
         using value_type = std::pair<key_type, value_type>;
 private:
         value_type entries[slots];
@@ -65,4 +64,3 @@ void leaf_node_t::insert(pool_base &pop,
 	current = 1 - current;
 	pop.persist(&current, sizeof(current));
 }
-

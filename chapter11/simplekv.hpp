@@ -36,9 +36,6 @@
  */
 
 #include <functional>
-#include <libpmemobj++/experimental/array.hpp>
-#include <libpmemobj++/experimental/string.hpp>
-#include <libpmemobj++/experimental/vector.hpp>
 #include <libpmemobj++/p.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/pext.hpp>
@@ -48,6 +45,10 @@
 #include <stdexcept>
 #include <string>
 
+#include "libpmemobj++/array.hpp"
+#include "libpmemobj++/string.hpp"
+#include "libpmemobj++/vector.hpp"
+
 /**
  * Value - type of the value stored in hashmap
  * N - number of buckets in hashmap
@@ -55,12 +56,11 @@
 template <typename Value, std::size_t N>
 class simple_kv {
 private:
-	using key_type = pmem::obj::experimental::string;
-	using bucket_type = pmem::obj::experimental::vector<
-		std::pair<key_type, std::size_t>>;
-	using bucket_array_type =
-		pmem::obj::experimental::array<bucket_type, N>;
-	using value_vector = pmem::obj::experimental::vector<Value>;
+	using key_type = pmem::obj::string;
+	using bucket_type = pmem::obj::vector<
+			std::pair<key_type, std::size_t>>;
+	using bucket_array_type = pmem::obj::array<bucket_type, N>;
+	using value_vector = pmem::obj::vector<Value>;
 
 	bucket_array_type buckets;
 	value_vector values;

@@ -37,6 +37,6 @@ namespace pmem
 namespace obj
 {
 	template <typename T>
-	using vector = experimental::array<T>;
+	using vector = experimental::vector<T>;
 }
 }
