@@ -31,7 +31,7 @@
  */
 
 /*
- * pmemkv.cpp -- demo a persistent memory key-value store
+ * pmemkv.cpp -- demo of persistent memory key-value store
  */
 
 #include <iostream>
@@ -58,29 +58,29 @@ int kvprint(string_view k, string_view v) {
 
 int main() {
 
-    pmemkv_config *cfg = pmemkv_config_new();
-    assert(cfg != nullptr);
+    // create config and set all required options
+    config cfg;
 
-    if (pmemkv_config_put_string(cfg, "path", PATH) != PMEMKV_STATUS_OK) {
+    if (cfg.put_string("path", PATH) != status::OK) {
         cerr << pmemkv_errormsg() << endl;
         return 1;
     }
 
-    if (pmemkv_config_put_uint64(cfg, "force_create", 1) != PMEMKV_STATUS_OK) {
+    if (cfg.put_uint64("force_create", 1) != status::OK) {
         cerr << pmemkv_errormsg() << endl;
         return 1;
     }
 
-    if (pmemkv_config_put_uint64(cfg, "size", SIZE) != PMEMKV_STATUS_OK) {
+    if (cfg.put_uint64("size", SIZE) != status::OK) {
         cerr << pmemkv_errormsg() << endl;
         return 1;
     }
 
-    // Create a key-value store using the "cmap" engine.
+    // create a key-value store using the "cmap" engine
     db *kv = new db();
     assert(kv != nullptr);
 
-    if (kv->open("cmap", cfg) != status::OK) {
+    if (kv->open("cmap", std::move(cfg)) != status::OK) {
         cerr << db::errormsg() << endl;
         return 1;
     }
@@ -102,7 +102,7 @@ int main() {
     // iterate through the key-value store
     kv->get_all(kvprint);
 
-    // Stop the engine.
+    // stop the engine
     delete kv;
 
     return 0;
