@@ -73,7 +73,7 @@ main(int argc, char *argv[])
 			});
 		}
 
-		auto runtime_kv = r->kv->get_runtime();
+		auto runtime_kv = simple_kv_runtime<int, 10>(r->kv.get());
 
 		std::cout << "usage: [get key|put key value|exit]" << std::endl;
 

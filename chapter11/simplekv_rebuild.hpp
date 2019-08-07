@@ -148,10 +148,4 @@ struct simple_kv_persistent {
 	 * entire pair would have to be snapshotted in case of value update */
 	value_vector values;
 	key_vector keys;
-
-	simple_kv_runtime<Value, N>
-	get_runtime()
-	{
-		return simple_kv_runtime<Value, N>(this);
-	}
 };
