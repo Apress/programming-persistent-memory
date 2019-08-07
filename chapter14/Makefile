@@ -32,7 +32,7 @@ CC = gcc
 CXX = g++
 RM = rm -f
 
-TARGETS=listing_14-1 listing_14-2 listing_14-3
+TARGETS=listing_14-1 listing_14-2 listing_14-3 listing_14-4
 TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
 
 all: $(TARGETS) listings
