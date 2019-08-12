@@ -1,0 +1,15 @@
+# ipmctl show -dimm
+ DimmID | Capacity  | HealthState | ActionRequired | LockState | FWVersion    
+==============================================================================
+ 0x0001 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x0011 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x0021 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x0101 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x0111 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x0121 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1001 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1011 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1021 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1101 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1111 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
+ 0x1121 | 252.4 GiB | Healthy     | 0              | Disabled  | 01.02.00.5367
