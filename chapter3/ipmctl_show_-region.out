@@ -1,0 +1,5 @@
+
+ SocketID | ISetID             | PersistentMemoryType | Capacity   | FreeCapacity | HealthState 
+================================================================================================
+ 0x0000   | 0x2d3c7f48f4e22ccc | AppDirect            | 1512.0 GiB | 0.0 GiB      | Healthy
+ 0x0001   | 0xdd387f488ce42ccc | AppDirect            | 1512.0 GiB | 1512.0 GiB   | Healthy
