@@ -34,14 +34,11 @@
 
 .SUFFIXES: .lst
 
-PROGS = data_oriented_design simplekv simplekv_rebuild
+PROGS = data_oriented_design simplekv simplekv_rebuild versioning_insert
 
 all: $(PROGS) listings
 
-listings: b+tree_insert.lst simplekv.lst simplekv_rebuild.lst data_oriented_design.lst
-
-b+tree_insert.lst: b+tree_insert.cpp
-	cat -n $^ > $@
+listings: simplekv.lst simplekv_rebuild.lst data_oriented_design.lst versioning_insert.lst
 
 simplekv.lst: simplekv.hpp
 	cat -n $^ > $@
@@ -52,6 +49,9 @@ simplekv_rebuild.lst: simplekv_rebuild.hpp
 data_oriented_design.lst: data_oriented_design.cpp
 	cat -n $^ > $@
 
+versioning_insert.lst: versioning_insert.cpp
+	cat -n $^ > $@
+
 simplekv: simplekv.cpp
 	$(CXX) -o simplekv simplekv.cpp -lpmemobj
 
@@ -60,6 +60,9 @@ simplekv_rebuild: simplekv_rebuild.cpp
 
 data_oriented_design: data_oriented_design.cpp
 	$(CXX) -o data_oriented_design data_oriented_design.cpp -lpmemobj
+
+versioning_insert: versioning_insert.cpp
+	$(CXX) -o versioning_insert versioning_insert.cpp -g -lpmemobj
 
 clean:
 	$(RM) *.o core a.out
