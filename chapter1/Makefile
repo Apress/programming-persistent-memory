@@ -39,7 +39,7 @@ all: pmemkv listings
 listings: pmemkv.lst
 
 %.lst: %.cpp
-	cat -n $^ > $@
+	expand -t 4 < $^ | cat -n > $@
 
 pmemkv: pmemkv.cpp
 	$(CXX) -o pmemkv pmemkv.cpp -lpmemkv

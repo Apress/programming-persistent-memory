@@ -44,7 +44,10 @@ using std::cout;
 using std::endl;
 using std::string;
 
-/* for this example, create a 1 Gig file called "/daxfs/kvfile" */
+/*
+ * for this example, create a 1 Gig file
+ * called "/daxfs/kvfile"
+ */
 auto PATH = "/daxfs/kvfile";
 const uint64_t SIZE = 1024 * 1024 * 1024;
 
@@ -52,7 +55,8 @@ const uint64_t SIZE = 1024 * 1024 * 1024;
  * kvprint -- print a single key-value pair
  */
 int kvprint(string_view k, string_view v) {
-	cout << "key: " << k.data() << ", value: " << v.data() << endl;
+	cout << "key: "    << k.data() <<
+		" value: " << v.data() << endl;
 	return 0;
 }
 
@@ -61,7 +65,8 @@ int main() {
 	db *kv = new db();
 	assert(kv != nullptr);
 
-	// create the config information for libpmemkv's open method
+	// create the config information for
+	// libpmemkv's open method
 	config cfg;
 
 	if (cfg.put_string("path", PATH) != status::OK) {
