@@ -54,12 +54,12 @@ int main() {
     // Create a key-value store using the "cmap" engine.
     db kv;
 
-    if (kv.open("cmap", cfg) != status::OK) {
+    if (kv.open("cmap", config(cfg)) != status::OK) {
         std::cerr << db::errormsg() << std::endl;
         return 1;
     }
 
-    // add 2 entries with name and phone number
+    // Add 2 entries with name and phone number
     if (kv.put("John", "123-456-789") != status::OK) {
         std::cerr << db::errormsg() << std::endl;
         return 1;
@@ -69,7 +69,7 @@ int main() {
         return 1;
     }
 
-    // count elements
+    // Count elements
     size_t cnt;
     if (kv.count_all(cnt) != status::OK) {
         std::cerr << db::errormsg() << std::endl;
@@ -77,7 +77,7 @@ int main() {
     }
     assert(cnt == 2);
 
-    // Reading key back
+    // Read key back
     std::string number;
     if (kv.get("John", &number) != status::OK) {
         std::cerr << db::errormsg() << std::endl;
@@ -85,7 +85,7 @@ int main() {
     }
     assert(number == "123-456-789");
 
-    // iterate through the phonebook
+    // Iterate through the phonebook
     if (kv.get_all([](string_view name, string_view number) {
             std::cout << "name: " << name.data() <<
             ", number: " << number.data() << std::endl;
@@ -95,16 +95,16 @@ int main() {
         return 1;
     }
 
-    // removal
+    // Remove one record
     if (kv.remove("John") != status::OK) {
         std::cerr << db::errormsg() << std::endl;
         return 1;
     }
 
-    // lookup
+    // Look for removed record
     assert(kv.exists("John") == status::NOT_FOUND);
 
-    // methods for ordered engines
+    // Try to use one of methods of ordered engines
     assert(kv.get_above("John", [](string_view key, string_view value) {
         std::cout << "This callback should never be called" << std::endl;
         return 1;
