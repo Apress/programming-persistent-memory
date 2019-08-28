@@ -26,20 +26,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-9.c -- example of writing to persisting memory without flushing
+ * listing_12-48.cpp -- checking the consistency of the data structure written
+ *                     by listing_12-44.cpp
  */
 
 #include <stdio.h>
-#include <sys/mman.h>
-#include <fcntl.h>
+#include <stdint.h>
+#include <libpmemobj++/persistent_ptr.hpp>
+
+using namespace std;
+namespace pobj = pmem::obj;
+
+struct header_t {
+    uint32_t counter;
+    uint8_t reserved[60];
+};
+struct record_t {
+    char name[63];
+    char valid;
+};
+struct root {
+    pobj::persistent_ptr<header_t> header;
+    pobj::persistent_ptr<record_t[]> records;
+};
+
+pobj::pool<root> pop;
 
 int main(int argc, char *argv[]) {
-    int fd, *data;
-    fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-    posix_fallocate(fd, 0, sizeof(int));
-    data = (int *) mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
-    *data = 1234;
-    munmap(data, sizeof(int));
-    return 0;
+
+    pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
+    auto proot = pop.root();
+    pobj::persistent_ptr<header_t> header = proot->header;
+    pobj::persistent_ptr<record_t[]> records = proot->records;
+
+    for (uint8_t i = 0; i < header->counter; i++) {
+        if (records[i].valid < 1 or records[i].valid > 2)
+            return 1; // we should not have reached this record
+    }
+
+    pop.close();
+    return 0; // everything ok
 }

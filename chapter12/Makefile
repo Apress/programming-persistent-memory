@@ -32,7 +32,7 @@ CC = gcc
 CXX = g++
 RM = rm -f
 
-TARGETS=leak stackoverflow listing_8-9 listing_8-11 listing_8-13 listing_8-16 listing_8-17 listing_8-17 listing_8-23 listing_8-25 listing_8-28 listing_8-33 listing_8-36 listing_8-38 listing_8-40 listing_8-44 listing_8-45 listing_8-48 listing_8-51
+TARGETS=leak stackoverflow listing_12-9 listing_12-11 listing_12-13 listing_12-16 listing_12-17 listing_12-17 listing_12-23 listing_12-25 listing_12-28 listing_12-33 listing_12-36 listing_12-38 listing_12-40 listing_12-44 listing_12-45 listing_12-48 listing_12-51
 TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
 
 all: $(TARGETS) listings

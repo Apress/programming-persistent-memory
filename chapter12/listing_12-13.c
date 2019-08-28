@@ -26,28 +26,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-17.c -- example of reading from persistent memory with a write
- *                   dependency
+ * listing_12-13.c -- example of writing to persistent memory with flushing,
+ *                   using VALGRIND macros
  */
 
+#include <emmintrin.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <valgrind/pmemcheck.h>
+
+// flusing from user space
+void flush(const void *addr, size_t len) {
+    uintptr_t flush_align = 64, uptr;
+    for (uptr = (uintptr_t)addr & ~(flush_align - 1);
+        uptr < (uintptr_t)addr + len; uptr += flush_align)
+        _mm_clflush((char *)uptr);
+}
 
 int main(int argc, char *argv[]) {
-    int fd, *ptr, *data, *flag;
+    int fd, *data;
 
+    // open the file and allocate space for one integer
     fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-    posix_fallocate(fd, 0, 2 * sizeof(int));
+    posix_fallocate(fd, 0, sizeof(int));
 
-    ptr = (int *) mmap(NULL, 2 * sizeof(int), PROT_READ|PROT_WRITE,
+    // map the file and register it with VALGRIND
+    data = (int *)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
             MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, sizeof(int));
 
-    data = &(ptr[1]);
-    flag = &(ptr[0]);
-    if (*flag == 1)
-        printf("data = %d\n", *data);
+    // write and flush
+    *data = 1234;
+    flush((void *)data, sizeof(int));
 
-    munmap(ptr, 2 * sizeof(int));
+    // unmap and un-register
+    munmap(data, sizeof(int));
+    VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, sizeof(int));
     return 0;
 }

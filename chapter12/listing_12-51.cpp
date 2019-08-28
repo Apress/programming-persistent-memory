@@ -26,13 +26,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-48.cpp -- checking the consistency of the data structure written
- *                     by listing_8-44.cpp
+ * listing_12-51.cpp -- fixing listing_12-44.cpp by moving the incrementation
+ *                     of the counter to the end of the loop
  */
 
+#include <emmintrin.h>
+#include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 #include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj++/make_persistent.hpp>
+#include <libpmemobj++/make_persistent_array.hpp>
+#include <libpmemobj++/transaction.hpp>
+#include <valgrind/pmemcheck.h>
 
 using namespace std;
 namespace pobj = pmem::obj;
@@ -54,16 +61,35 @@ pobj::pool<root> pop;
 
 int main(int argc, char *argv[]) {
 
+    VALGRIND_PMC_EMIT_LOG("PMREORDER_TAG.BEGIN");
+
     pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
     auto proot = pop.root();
-    pobj::persistent_ptr<header_t> header = proot->header;
+
+    pobj::transaction::run(pop, [&] {
+        proot->header = pobj::make_persistent<header_t>();
+        proot->header->counter = 0;
+        proot->records = pobj::make_persistent<record_t[]>(10);
+        proot->records[0].valid = 0;
+    });
+    pobj::persistent_ptr<header_t> header  = proot->header;
     pobj::persistent_ptr<record_t[]> records = proot->records;
 
-    for (uint8_t i = 0; i < header->counter; i++) {
-        if (records[i].valid < 1 or records[i].valid > 2)
-            return 1; // we should not have reached this record
+    VALGRIND_PMC_EMIT_LOG("PMREORDER_TAG.END");
+
+    header->counter = 0;
+    for (uint8_t i = 0; i < 10; i++) {
+        if (rand() % 2 == 0) {
+            snprintf(records[i].name, 63, "record #%u", i + 1);
+            pop.persist(records[i].name, 63);
+            records[i].valid = 2;
+        } else
+            records[i].valid = 1;
+        pop.persist(&(records[i].valid), 1);
+        header->counter++;
     }
+    pop.persist(&(header->counter), 4);
 
     pop.close();
-    return 0; // everything ok
+    return 0;
 }

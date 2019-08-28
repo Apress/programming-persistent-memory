@@ -26,46 +26,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-45.cpp -- reading the data structure written by listing_8-44.cpp
- *                     to persistent memory
+ * listing_12-28.c -- example of writing within a transaction
  */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <libpmemobj++/persistent_ptr.hpp>
+#include <libpmemobj.h>
 
-using namespace std;
-namespace pobj = pmem::obj;
-
-struct header_t {
-    uint32_t counter;
-    uint8_t reserved[60];
-};
-struct record_t {
-    char name[63];
-    char valid;
-};
-struct root {
-    pobj::persistent_ptr<header_t> header;
-    pobj::persistent_ptr<record_t[]> records;
+struct my_root {
+    int value;
+    int is_odd;
 };
 
-pobj::pool<root> pop;
+POBJ_LAYOUT_BEGIN(example);
+POBJ_LAYOUT_ROOT(example, struct my_root);
+POBJ_LAYOUT_END(example);
 
 int main(int argc, char *argv[]) {
+    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
+                       POBJ_LAYOUT_NAME(example),
+                       (1024 * 1024 * 100), 0666);
 
-    pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
-    auto proot = pop.root();
-    pobj::persistent_ptr<header_t> header = proot->header;
-    pobj::persistent_ptr<record_t[]> records = proot->records;
+    TX_BEGIN(pop) {
+        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TX_ADD(root); // adding all root (value, is_odd) to the transaction
+        D_RW(root)->value = 4;
+        D_RW(root)->is_odd = D_RO(root)->value % 2;
+    } TX_END
 
-    for (uint8_t i = 0; i < header->counter; i++) {
-        if (records[i].valid == 2) {
-            printf("found valid record\n");
-            printf("  name   = %s\n", records[i].name);
-        }
-    }
-
-    pop.close();
     return 0;
 }

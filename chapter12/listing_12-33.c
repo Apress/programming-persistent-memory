@@ -26,43 +26,57 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-13.c -- example of writing to persistent memory with flushing,
- *                   using VALGRIND macros
+ * listing_12-33.c -- example of two threads adding the same persistent memory
+ *                   location to their respective transactions simultaneously
  */
 
-#include <emmintrin.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <valgrind/pmemcheck.h>
+#include <libpmemobj.h>
+#include <pthread.h>
 
-// flusing from user space
-void flush(const void *addr, size_t len) {
-    uintptr_t flush_align = 64, uptr;
-    for (uptr = (uintptr_t)addr & ~(flush_align - 1);
-        uptr < (uintptr_t)addr + len; uptr += flush_align)
-        _mm_clflush((char *)uptr);
+struct my_root {
+    int value;
+    int is_odd;
+};
+
+POBJ_LAYOUT_BEGIN(example);
+POBJ_LAYOUT_ROOT(example, struct my_root);
+POBJ_LAYOUT_END(example);
+
+pthread_mutex_t lock;
+
+// function to be run by extra thread
+void *func(void *args) {
+    PMEMobjpool *pop = (PMEMobjpool *) args;
+
+    TX_BEGIN(pop) {
+        pthread_mutex_lock(&lock);
+        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TX_ADD(root);
+        D_RW(root)->value = D_RO(root)->value + 3;
+        pthread_mutex_unlock(&lock);
+    } TX_END
 }
 
 int main(int argc, char *argv[]) {
-    int fd, *data;
+    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
+                       POBJ_LAYOUT_NAME(example),
+                       (1024 * 1024 * 10), 0666);
 
-    // open the file and allocate space for one integer
-    fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-    posix_fallocate(fd, 0, sizeof(int));
+    pthread_t thread;
+    pthread_mutex_init(&lock, NULL);
 
-    // map the file and register it with VALGRIND
-    data = (int *)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
-    VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, sizeof(int));
+    TX_BEGIN(pop) {
+        pthread_mutex_lock(&lock);
+        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TX_ADD(root);
+        pthread_create(&thread, NULL, func, (void *) pop);
+        D_RW(root)->value = D_RO(root)->value + 4;
+        D_RW(root)->is_odd = D_RO(root)->value % 2;
+        pthread_mutex_unlock(&lock);
+        // wait here to make sure extra thread finishes first
+        pthread_join(thread, NULL);
+    } TX_END
 
-    // write and flush
-    *data = 1234;
-    flush((void *)data, sizeof(int));
-
-    // unmap and un-register
-    munmap(data, sizeof(int));
-    VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, sizeof(int));
+    pthread_mutex_destroy(&lock);
     return 0;
 }

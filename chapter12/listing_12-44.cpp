@@ -26,8 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-51.cpp -- fixing listing_8-44.cpp by moving the incrementation
- *                     of the counter to the end of the loop
+ * listing_12-44.cpp -- example of writing to persistent memory with an
+ *                     out-of-order write bug
  */
 
 #include <emmintrin.h>
@@ -61,17 +61,21 @@ pobj::pool<root> pop;
 
 int main(int argc, char *argv[]) {
 
+    // everything between BEGIN and END can be assigned
+    // a particular engine in pmreorder
     VALGRIND_PMC_EMIT_LOG("PMREORDER_TAG.BEGIN");
 
     pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
     auto proot = pop.root();
 
+    // allocation of memory and initialization to zero
     pobj::transaction::run(pop, [&] {
         proot->header = pobj::make_persistent<header_t>();
         proot->header->counter = 0;
-        proot->records = pobj::make_persistent<record_t[]>(1);
+        proot->records = pobj::make_persistent<record_t[]>(10);
         proot->records[0].valid = 0;
     });
+
     pobj::persistent_ptr<header_t> header  = proot->header;
     pobj::persistent_ptr<record_t[]> records = proot->records;
 
@@ -79,16 +83,16 @@ int main(int argc, char *argv[]) {
 
     header->counter = 0;
     for (uint8_t i = 0; i < 10; i++) {
+        header->counter++;
         if (rand() % 2 == 0) {
             snprintf(records[i].name, 63, "record #%u", i + 1);
-            pop.persist(records[i].name, 63);
+            pop.persist(records[i].name, 63); // flush
             records[i].valid = 2;
         } else
             records[i].valid = 1;
-        pop.persist(&(records[i].valid), 1);
-        header->counter++;
+        pop.persist(&(records[i].valid), 1); // flush
     }
-    pop.persist(&(header->counter), 4);
+    pop.persist(&(header->counter), 4); // flush
 
     pop.close();
     return 0;

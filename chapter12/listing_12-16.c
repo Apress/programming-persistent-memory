@@ -26,31 +26,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-28.c -- example of writing within a transaction
+ * listing_12-16.c -- example of writing to persistent memory with a write
+ *                   dependency; the code does not flush
  */
 
-#include <libpmemobj.h>
-
-struct my_root {
-    int value;
-    int is_odd;
-};
-
-POBJ_LAYOUT_BEGIN(example);
-POBJ_LAYOUT_ROOT(example, struct my_root);
-POBJ_LAYOUT_END(example);
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
-    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
-                       POBJ_LAYOUT_NAME(example),
-                       (1024 * 1024 * 100), 0666);
+    int fd, *ptr, *data, *flag;
 
-    TX_BEGIN(pop) {
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
-        TX_ADD(root); // adding all root (value, is_odd) to the transaction
-        D_RW(root)->value = 4;
-        D_RW(root)->is_odd = D_RO(root)->value % 2;
-    } TX_END
+    fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
+    posix_fallocate(fd, 0, sizeof(int)*2);
 
+    ptr = (int *) mmap(NULL, sizeof(int)*2, PROT_READ|PROT_WRITE,
+            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+
+    data = &(ptr[1]);
+    flag = &(ptr[0]);
+    *data = 1234;
+    *flag = 1;
+
+    munmap(ptr, 2 * sizeof(int));
     return 0;
 }

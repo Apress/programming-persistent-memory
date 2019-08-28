@@ -26,40 +26,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-23.c -- example of writing to persistent memory with a write
- *                   dependency. The code flushes both writes
+ * listing_12-25.c -- example of writing a transaction with memory location not
+ *                   added to the transaction
  */
 
-#include <emmintrin.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <string.h>
+#include <libpmemobj.h>
 
-void flush(const void *addr, size_t len) {
-        uintptr_t flush_align = 64, uptr;
-        for (uptr = (uintptr_t)addr & ~(flush_align - 1);
-            uptr < (uintptr_t)addr + len; uptr += flush_align)
-                _mm_clflush((char *)uptr);
-}
+struct my_root {
+    int value;
+    int is_odd;
+};
+
+// registering type 'my_root' in the layout
+POBJ_LAYOUT_BEGIN(example);
+POBJ_LAYOUT_ROOT(example, struct my_root);
+POBJ_LAYOUT_END(example);
 
 int main(int argc, char *argv[]) {
-        int fd, *ptr, *data, *flag;
+    // creating the pool
+    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
+                       POBJ_LAYOUT_NAME(example),
+                       (1024 * 1024 * 100), 0666);
 
-        fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-        posix_fallocate(fd, 0, sizeof(int) * 2);
+    // transation
+    TX_BEGIN(pop) {
+        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TX_ADD_FIELD(root, value); // adding root.value to the transaction
+        D_RW(root)->value = 4;
+        D_RW(root)->is_odd = D_RO(root)->value % 2;
+    } TX_END
 
-        ptr = (int *) mmap(NULL, sizeof(int) * 2, PROT_READ|PROT_WRITE,
-                MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
-
-        data = &(ptr[1]);
-        flag = &(ptr[0]);
-        *data = 1234;
-        flush((void *) data, sizeof(int));
-        *flag = 1;
-        flush((void *) flag, sizeof(int));
-
-        munmap(ptr, 2 * sizeof(int));
-        return 0;
+    return 0;
 }

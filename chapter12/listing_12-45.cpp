@@ -26,41 +26,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-40.c -- example of writing to persisting memory with a write
- *                   dependency. The code does an extra flush for the flag
+ * listing_12-45.cpp -- reading the data structure written by listing_12-44.cpp
+ *                     to persistent memory
  */
 
-#include <emmintrin.h>
-#include <stdint.h>
 #include <stdio.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <string.h>
+#include <stdint.h>
+#include <libpmemobj++/persistent_ptr.hpp>
 
-void flush(const void *addr, size_t len) {
-    uintptr_t flush_align = 64, uptr;
-    for (uptr = (uintptr_t)addr & ~(flush_align - 1);
-        uptr < (uintptr_t)addr + len; uptr += flush_align)
-        _mm_clflush((char *)uptr);
-}
+using namespace std;
+namespace pobj = pmem::obj;
+
+struct header_t {
+    uint32_t counter;
+    uint8_t reserved[60];
+};
+struct record_t {
+    char name[63];
+    char valid;
+};
+struct root {
+    pobj::persistent_ptr<header_t> header;
+    pobj::persistent_ptr<record_t[]> records;
+};
+
+pobj::pool<root> pop;
 
 int main(int argc, char *argv[]) {
-    int fd, *ptr, *data, *flag;
 
-    fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-    posix_fallocate(fd, 0, sizeof(int) * 2);
+    pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
+    auto proot = pop.root();
+    pobj::persistent_ptr<header_t> header = proot->header;
+    pobj::persistent_ptr<record_t[]> records = proot->records;
 
-    ptr = (int *) mmap(NULL, sizeof(int) * 2, PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
-    data = &(ptr[1]);
-    flag = &(ptr[0]);
+    for (uint8_t i = 0; i < header->counter; i++) {
+        if (records[i].valid == 2) {
+            printf("found valid record\n");
+            printf("  name   = %s\n", records[i].name);
+        }
+    }
 
-    *data = 1234;
-    flush((void *) data, sizeof(int));
-    *flag = 1;
-    flush((void *) flag, sizeof(int));
-    flush((void *) flag, sizeof(int)); // extra flush
-
-    munmap(ptr, 2 * sizeof(int));
+    pop.close();
     return 0;
 }

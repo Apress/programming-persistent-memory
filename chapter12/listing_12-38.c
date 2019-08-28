@@ -26,8 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-36.c -- example of persistent memory overwriting (variable data)
- *                   before flushing
+ * listing_12-38.c -- example of redundant flushing of a persistent memory
+ *                   variable
  */
 
 #include <emmintrin.h>
@@ -52,12 +52,12 @@ int main(int argc, char *argv[]) {
 
     data = (int *)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
             MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+
     VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, sizeof(int));
 
-    // writing twice before flushing
     *data = 1234;
-    *data = 4321;
     flush((void *)data, sizeof(int));
+    flush((void *)data, sizeof(int)); // extra flush
 
     munmap(data, sizeof(int));
     VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, sizeof(int));

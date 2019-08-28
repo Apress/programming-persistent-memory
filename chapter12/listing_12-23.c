@@ -26,57 +26,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-33.c -- example of two threads adding the same persistent memory
- *                   location to their respective transactions simultaneously
+ * listing_12-23.c -- example of writing to persistent memory with a write
+ *                   dependency. The code flushes both writes
  */
 
-#include <libpmemobj.h>
-#include <pthread.h>
+#include <emmintrin.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <string.h>
 
-struct my_root {
-    int value;
-    int is_odd;
-};
-
-POBJ_LAYOUT_BEGIN(example);
-POBJ_LAYOUT_ROOT(example, struct my_root);
-POBJ_LAYOUT_END(example);
-
-pthread_mutex_t lock;
-
-// function to be run by extra thread
-void *func(void *args) {
-    PMEMobjpool *pop = (PMEMobjpool *) args;
-
-    TX_BEGIN(pop) {
-        pthread_mutex_lock(&lock);
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
-        TX_ADD(root);
-        D_RW(root)->value = D_RO(root)->value + 3;
-        pthread_mutex_unlock(&lock);
-    } TX_END
+void flush(const void *addr, size_t len) {
+        uintptr_t flush_align = 64, uptr;
+        for (uptr = (uintptr_t)addr & ~(flush_align - 1);
+            uptr < (uintptr_t)addr + len; uptr += flush_align)
+                _mm_clflush((char *)uptr);
 }
 
 int main(int argc, char *argv[]) {
-    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
-                       POBJ_LAYOUT_NAME(example),
-                       (1024 * 1024 * 10), 0666);
+        int fd, *ptr, *data, *flag;
 
-    pthread_t thread;
-    pthread_mutex_init(&lock, NULL);
+        fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
+        posix_fallocate(fd, 0, sizeof(int) * 2);
 
-    TX_BEGIN(pop) {
-        pthread_mutex_lock(&lock);
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
-        TX_ADD(root);
-        pthread_create(&thread, NULL, func, (void *) pop);
-        D_RW(root)->value = D_RO(root)->value + 4;
-        D_RW(root)->is_odd = D_RO(root)->value % 2;
-        pthread_mutex_unlock(&lock);
-        // wait here to make sure extra thread finishes first
-        pthread_join(thread, NULL);
-    } TX_END
+        ptr = (int *) mmap(NULL, sizeof(int) * 2, PROT_READ|PROT_WRITE,
+                MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
 
-    pthread_mutex_destroy(&lock);
-    return 0;
+        data = &(ptr[1]);
+        flag = &(ptr[0]);
+        *data = 1234;
+        flush((void *) data, sizeof(int));
+        *flag = 1;
+        flush((void *) flag, sizeof(int));
+
+        munmap(ptr, 2 * sizeof(int));
+        return 0;
 }

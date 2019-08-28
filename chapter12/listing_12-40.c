@@ -26,28 +26,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-16.c -- example of writing to persistent memory with a write
- *                   dependency; the code does not flush
+ * listing_12-40.c -- example of writing to persisting memory with a write
+ *                   dependency. The code does an extra flush for the flag
  */
 
+#include <emmintrin.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
 
+void flush(const void *addr, size_t len) {
+    uintptr_t flush_align = 64, uptr;
+    for (uptr = (uintptr_t)addr & ~(flush_align - 1);
+        uptr < (uintptr_t)addr + len; uptr += flush_align)
+        _mm_clflush((char *)uptr);
+}
+
 int main(int argc, char *argv[]) {
     int fd, *ptr, *data, *flag;
 
     fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
-    posix_fallocate(fd, 0, sizeof(int)*2);
+    posix_fallocate(fd, 0, sizeof(int) * 2);
 
-    ptr = (int *) mmap(NULL, sizeof(int)*2, PROT_READ|PROT_WRITE,
+    ptr = (int *) mmap(NULL, sizeof(int) * 2, PROT_READ|PROT_WRITE,
             MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
-
     data = &(ptr[1]);
     flag = &(ptr[0]);
+
     *data = 1234;
+    flush((void *) data, sizeof(int));
     *flag = 1;
+    flush((void *) flag, sizeof(int));
+    flush((void *) flag, sizeof(int)); // extra flush
 
     munmap(ptr, 2 * sizeof(int));
     return 0;

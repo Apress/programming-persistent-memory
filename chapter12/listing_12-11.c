@@ -26,35 +26,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
- * listing_8-25.c -- example of writing a transaction with memory location not
- *                   added to the transaction
+ * listing_12.11.c -- example of writing to persistent memory without flushing,
+ *                   using VALGRIND macros
  */
 
-#include <libpmemobj.h>
-
-struct my_root {
-    int value;
-    int is_odd;
-};
-
-// registering type 'my_root' in the layout
-POBJ_LAYOUT_BEGIN(example);
-POBJ_LAYOUT_ROOT(example, struct my_root);
-POBJ_LAYOUT_END(example);
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <valgrind/pmemcheck.h>
 
 int main(int argc, char *argv[]) {
-    // creating the pool
-    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
-                       POBJ_LAYOUT_NAME(example),
-                       (1024 * 1024 * 100), 0666);
+    int fd, *data;
 
-    // transation
-    TX_BEGIN(pop) {
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
-        TX_ADD_FIELD(root, value); // adding root.value to the transaction
-        D_RW(root)->value = 4;
-        D_RW(root)->is_odd = D_RO(root)->value % 2;
-    } TX_END
+    // open the file and allocate enough space for an integer
+    fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
+    posix_fallocate(fd, 0, sizeof(int));
 
+    // memory map the file and register the mapped memory with
+    // VALGRIND
+    data = (int *) mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
+            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, sizeof(int));
+
+    // write to pmem
+    *data = 1234;
+
+    // unmap the memory and un-register it with VALGRIND
+    munmap(data, sizeof(int));
+    VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, sizeof(int));
     return 0;
 }
