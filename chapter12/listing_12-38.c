@@ -40,7 +40,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 void flush(const void *addr, size_t len) {
     uintptr_t flush_align = 64, uptr;
     for (uptr = (uintptr_t)addr & ~(flush_align - 1);
-        uptr < (uintptr_t)addr + len; uptr += flush_align)
+            uptr < (uintptr_t)addr + len; 
+            uptr += flush_align)
         _mm_clflush((char *)uptr);
 }
 
@@ -50,16 +51,20 @@ int main(int argc, char *argv[]) {
     fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
     posix_fallocate(fd, 0, sizeof(int));
 
-    data = (int *)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    data = (int *)mmap(NULL, sizeof(int), 
+            PROT_READ | PROT_WRITE,
+            MAP_SHARED_VALIDATE | MAP_SYNC, 
+            fd, 0);
 
-    VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, sizeof(int));
+    VALGRIND_PMC_REGISTER_PMEM_MAPPING(data, 
+                                       sizeof(int));
 
     *data = 1234;
     flush((void *)data, sizeof(int));
     flush((void *)data, sizeof(int)); // extra flush
 
     munmap(data, sizeof(int));
-    VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, sizeof(int));
+    VALGRIND_PMC_REMOVE_PMEM_MAPPING(data, 
+                                     sizeof(int));
     return 0;
 }

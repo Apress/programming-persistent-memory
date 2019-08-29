@@ -54,14 +54,18 @@ pobj::pool<root> pop;
 
 int main(int argc, char *argv[]) {
 
-    pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
+    pop = pobj::pool<root>::open("/mnt/pmem/file", 
+                                 "RECORDS");
     auto proot = pop.root();
-    pobj::persistent_ptr<header_t> header = proot->header;
-    pobj::persistent_ptr<record_t[]> records = proot->records;
+    pobj::persistent_ptr<header_t> header 
+        = proot->header;
+    pobj::persistent_ptr<record_t[]> records 
+        = proot->records;
 
     for (uint8_t i = 0; i < header->counter; i++) {
-        if (records[i].valid < 1 or records[i].valid > 2)
-            return 1; // we should not have reached this record
+        if (records[i].valid < 1 or 
+                            records[i].valid > 2)
+            return 1; // data struc. corrupted
     }
 
     pop.close();

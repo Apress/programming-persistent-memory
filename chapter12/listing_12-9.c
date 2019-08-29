@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
     int fd, *data;
     fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
     posix_fallocate(fd, 0, sizeof(int));
-    data = (int *) mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    data = (int *) mmap(NULL, sizeof(int), PROT_READ |
+            PROT_WRITE, MAP_SHARED_VALIDATE | 
+            MAP_SYNC, fd, 0);
     *data = 1234;
     munmap(data, sizeof(int));
     return 0;

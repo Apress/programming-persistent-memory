@@ -44,14 +44,18 @@ POBJ_LAYOUT_END(example);
 
 int main(int argc, char *argv[]) {
     // creating the pool
-    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
-                       POBJ_LAYOUT_NAME(example),
-                       (1024 * 1024 * 100), 0666);
+    PMEMobjpool *pop= pmemobj_create("/mnt/pmem/pool",
+                      POBJ_LAYOUT_NAME(example),
+                      (1024 * 1024 * 100), 0666);
 
     // transation
     TX_BEGIN(pop) {
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
-        TX_ADD_FIELD(root, value); // adding root.value to the transaction
+        TOID(struct my_root) root 
+            = POBJ_ROOT(pop, struct my_root);
+        
+        // adding root.value to the transaction
+        TX_ADD_FIELD(root, value);
+        
         D_RW(root)->value = 4;
         D_RW(root)->is_odd = D_RO(root)->value % 2;
     } TX_END

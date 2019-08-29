@@ -40,8 +40,10 @@ int main(int argc, char *argv[]) {
     fd = open("/mnt/pmem/file", O_CREAT|O_RDWR, 0666);
     posix_fallocate(fd, 0, 2 * sizeof(int));
 
-    ptr = (int *) mmap(NULL, 2 * sizeof(int), PROT_READ|PROT_WRITE,
-            MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    ptr = (int *) mmap(NULL, 2 * sizeof(int), 
+                       PROT_READ | PROT_WRITE,
+                       MAP_SHARED_VALIDATE | MAP_SYNC, 
+                       fd, 0);
 
     data = &(ptr[1]);
     flag = &(ptr[0]);

@@ -63,24 +63,30 @@ int main(int argc, char *argv[]) {
 
     VALGRIND_PMC_EMIT_LOG("PMREORDER_TAG.BEGIN");
 
-    pop = pobj::pool<root>::open("/mnt/pmem/file", "RECORDS");
+    pop = pobj::pool<root>::open("/mnt/pmem/file", 
+                                 "RECORDS");
     auto proot = pop.root();
 
     pobj::transaction::run(pop, [&] {
-        proot->header = pobj::make_persistent<header_t>();
+        proot->header 
+            = pobj::make_persistent<header_t>();
         proot->header->counter = 0;
-        proot->records = pobj::make_persistent<record_t[]>(10);
+        proot->records 
+            = pobj::make_persistent<record_t[]>(10);
         proot->records[0].valid = 0;
     });
-    pobj::persistent_ptr<header_t> header  = proot->header;
-    pobj::persistent_ptr<record_t[]> records = proot->records;
+    pobj::persistent_ptr<header_t> header  
+        = proot->header;
+    pobj::persistent_ptr<record_t[]> records 
+        = proot->records;
 
     VALGRIND_PMC_EMIT_LOG("PMREORDER_TAG.END");
 
     header->counter = 0;
     for (uint8_t i = 0; i < 10; i++) {
         if (rand() % 2 == 0) {
-            snprintf(records[i].name, 63, "record #%u", i + 1);
+            snprintf(records[i].name, 63, 
+                    "record #%u", i + 1);
             pop.persist(records[i].name, 63);
             records[i].valid = 2;
         } else

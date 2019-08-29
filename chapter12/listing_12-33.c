@@ -50,7 +50,8 @@ void *func(void *args) {
 
     TX_BEGIN(pop) {
         pthread_mutex_lock(&lock);
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TOID(struct my_root) root 
+            = POBJ_ROOT(pop, struct my_root);
         TX_ADD(root);
         D_RW(root)->value = D_RO(root)->value + 3;
         pthread_mutex_unlock(&lock);
@@ -58,22 +59,24 @@ void *func(void *args) {
 }
 
 int main(int argc, char *argv[]) {
-    PMEMobjpool *pop = pmemobj_create("/mnt/pmem/pool",
-                       POBJ_LAYOUT_NAME(example),
-                       (1024 * 1024 * 10), 0666);
+    PMEMobjpool *pop= pmemobj_create("/mnt/pmem/pool",
+                      POBJ_LAYOUT_NAME(example),
+                      (1024 * 1024 * 10), 0666);
 
     pthread_t thread;
     pthread_mutex_init(&lock, NULL);
 
     TX_BEGIN(pop) {
         pthread_mutex_lock(&lock);
-        TOID(struct my_root) root = POBJ_ROOT(pop, struct my_root);
+        TOID(struct my_root) root 
+            = POBJ_ROOT(pop, struct my_root);
         TX_ADD(root);
-        pthread_create(&thread, NULL, func, (void *) pop);
+        pthread_create(&thread, NULL, 
+                       func, (void *) pop);
         D_RW(root)->value = D_RO(root)->value + 4;
         D_RW(root)->is_odd = D_RO(root)->value % 2;
         pthread_mutex_unlock(&lock);
-        // wait here to make sure extra thread finishes first
+        // wait to make sure other thread finishes 1st
         pthread_join(thread, NULL);
     } TX_END
 
