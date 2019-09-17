@@ -1,1 +1,1 @@
-These are the listings for Chapter 18 - Reliability, Availability, and Serviceability (RAS). 
+These are the listings for Chapter 18 - Remote Persistent Memory 
