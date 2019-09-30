@@ -43,7 +43,7 @@
 #include <string.h>
 #include <libpmem.h>
 
-/* using 4k of pmem for this example */
+/* Using 4K of pmem for this example */
 #define PMEM_LEN 4096
 
 int
@@ -54,13 +54,15 @@ main(int argc, char *argv[])
 	int is_pmem;
 
 	if (argc != 2) {
-		fprintf(stderr, "Usage: %s filename\n", argv[0]);
+		fprintf(stderr, "Usage: %s filename\n", 
+			argv[0]);
 		exit(1);
 	}
 
 	/* Create a pmem file and memory map it. */
-	if ((pmemaddr = pmem_map_file(argv[1], PMEM_LEN, PMEM_FILE_CREATE,
-				0666, &mapped_len, &is_pmem)) == NULL) {
+	if ((pmemaddr = pmem_map_file(argv[1], PMEM_LEN, 
+			PMEM_FILE_CREATE, 0666, &mapped_len, 
+			&is_pmem)) == NULL) {
 		perror("pmem_map_file");
 		exit(1);
 	}

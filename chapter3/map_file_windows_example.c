@@ -54,11 +54,12 @@ int
 main(int argc, char *argv[])
 {
 	if (argc != 2) {
-		fprintf(stderr, "Usage: %s filename\n", argv[0]);
+		fprintf(stderr, "Usage: %s filename\n", 
+			argv[0]);
 		exit(1);
 	}
 
-	/* Create the file or open if the file already exists */
+	/* Create the file or open if the file exists */
 	HANDLE fh = CreateFile(argv[1],
 		GENERIC_READ|GENERIC_WRITE,
 		0,
@@ -73,7 +74,10 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/* Get the file length for use when memory mapping later */
+	/* 
+     * Get the file length for use when 
+     * memory mapping later 
+     * */
 	DWORD filelen = GetFileSize(fh, NULL);
 	if (filelen == 0) {
 		fprintf(stderr, "GetFileSize, gle: 0x%08x",
@@ -90,12 +94,15 @@ main(int argc, char *argv[])
 		NULL);
 
 	if (fmh == NULL) {
-		fprintf(stderr, "CreateFileMapping, gle: 0x%08x",
-			GetLastError());
+		fprintf(stderr, "CreateFileMapping, 
+			gle: 0x%08x", GetLastError());
 		exit(1);
 	}
 
-	/* Map into our address space and get a pointer to the beginning */
+	/* 
+ 	 * Map into our address space and get a pointer 
+     * to the beginning 
+     * */
 	char *pmaddr = (char *)MapViewOfFileEx(fmh,
 		FILE_MAP_ALL_ACCESS,
 		0,
@@ -104,34 +111,41 @@ main(int argc, char *argv[])
 		NULL); /* hint address */
 
 	if (pmaddr == NULL) {
-		fprintf(stderr, "MapViewOfFileEx, gle: 0x%08x",
-			GetLastError());
+		fprintf(stderr, "MapViewOfFileEx, 
+			gle: 0x%08x", GetLastError());
 		exit(1);
 	}
 
-	/* On windows must leave the file handle(s) open while mmaped */
+	/* 
+ 	 * On windows must leave the file handle(s) 
+ 	 * open while mmaped 
+ 	 * */
 
 	/* store a string to the beginning of the file  */
-	strcpy(pmaddr, "This is new data written to the file");
+	strcpy(pmaddr, "This is new data written to 
+		the file");
 
-	/* Flush this page with length rounded up to 4k page size */
+	/* 
+ 	 * Flush this page with length rounded up to 4K 
+ 	 * page size 
+ 	 * */
 	if (FlushViewOfFile(pmaddr, 4096) == FALSE) {
-		fprintf(stderr, "FlushViewOfFile, gle: 0x%08x",
-			GetLastError());
+		fprintf(stderr, "FlushViewOfFile, 
+			gle: 0x%08x", GetLastError());
 		exit(1);
 	}
 
-	/* Now flush the complete file to backing storage */
+	/* Flush the complete file to backing storage */
 	if (FlushFileBuffers(fh) == FALSE) {
-		fprintf(stderr, "FlushFileBuffers, gle: 0x%08x",
-			GetLastError());
+		fprintf(stderr, "FlushFileBuffers, 
+			gle: 0x%08x", GetLastError());
 		exit(1);
 	}
 
 	/* Explicitly unmap before closing the file */
 	if (UnmapViewOfFile(pmaddr) == FALSE) {
-		fprintf(stderr, "UnmapViewOfFile, gle: 0x%08x",
-			GetLastError());
+		fprintf(stderr, "UnmapViewOfFile, 
+			gle: 0x%08x", GetLastError());
 		exit(1);
 	}
 
