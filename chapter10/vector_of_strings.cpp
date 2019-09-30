@@ -31,8 +31,9 @@
  */
 
 /*
- * vector_of_strings.cpp - Demonstrated how to create a vector
- * 		of strings residing on persistent memory. 
+ * vector_of_strings.cpp - Demonstrated how to create
+ * 				a vector of strings residing on 
+ * 				persistent memory. 
  */
 
 #include <pmem_allocator.h>
@@ -40,17 +41,18 @@
 #include <string>
 #include <scoped_allocator>
 #include <cassert>
+#include <iostream>
  
-typedef pmem::allocator<char> str_alloc_type;
+typedef libmemkind::pmem::allocator<char> str_alloc_type;
  
 typedef std::basic_string<char, std::char_traits<char>, str_alloc_type> pmem_string;
  
-typedef pmem::allocator<pmem_string> vec_alloc_type;
+typedef libmemkind::pmem::allocator<pmem_string> vec_alloc_type;
  
 typedef std::vector<pmem_string, std::scoped_allocator_adaptor<vec_alloc_type> > vector_type;
  
 int main(int argc, char *argv[]) {
-	const size_t pmem_max_size = 64*1024*1024; // 64 MB
+	const size_t pmem_max_size = 64*1024*1024; //64 MB
 	const std::string pmem_dir("/tmp");
 	
 	// Create allocator object
@@ -58,11 +60,11 @@ int main(int argc, char *argv[]) {
 	// Create std::vector with our allocator.
 	vector_type v(alc);
 	
-	v.emplace_back(“Foo”);
-	v.emplace_back(“Bar”);
+	v.emplace_back("Foo");
+	v.emplace_back("Bar");
  
 	for(auto str : v) {
-    	std::cout << str << std::endl;
+    	    std::cout << str << std::endl;
 	}
    	
 	return 0;
