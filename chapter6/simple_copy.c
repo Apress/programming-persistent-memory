@@ -52,7 +52,7 @@
 #include <string.h>
 #include <libpmem.h>
 
-/* just copying 4k to pmem for this example */
+/* Just copying 4K to pmem for this example */
 #define BUF_LEN 4096
 
 int
@@ -66,7 +66,8 @@ main(int argc, char *argv[])
 	int cc;
 
 	if (argc != 3) {
-		fprintf(stderr, "usage: %s src-file dst-file\n", argv[0]);
+		fprintf(stderr, "usage: %s src-file dst-file
+			\n", argv[0]);
 		exit(1);
 	}
 
@@ -78,8 +79,8 @@ main(int argc, char *argv[])
 
 	/* create a pmem file and memory map it */
 	if ((pmemaddr = pmem_map_file(argv[2], BUF_LEN,
-				PMEM_FILE_CREATE|PMEM_FILE_EXCL,
-				0666, &mapped_len, &is_pmem)) == NULL) {
+			PMEM_FILE_CREATE|PMEM_FILE_EXCL,
+			0666, &mapped_len, &is_pmem)) == NULL) {
 		perror("pmem_map_file");
 		exit(1);
 	}
