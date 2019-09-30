@@ -31,7 +31,7 @@
  */
 
 /*
- * manpage.c -- simple example for the libpmem man page
+ * manpage.c - simple example for the libpmem man page
  */
 
 #include <sys/types.h>
@@ -48,7 +48,7 @@
 #include <string.h>
 #include <libpmem.h>
 
-/* using 4k of pmem for this example */
+/* Using 4K of pmem for this example */
 #define PMEM_LEN 4096
 
 #define PATH "/pmem-fs/myfile"
@@ -60,17 +60,18 @@ main(int argc, char *argv[])
 	size_t mapped_len;
 	int is_pmem;
 
-	/* create a pmem file and memory map it */
-	if ((pmemaddr = pmem_map_file(PATH, PMEM_LEN, PMEM_FILE_CREATE,
-				0666, &mapped_len, &is_pmem)) == NULL) {
+	/* Create a pmem file and memory map it */
+	if ((pmemaddr = pmem_map_file(PATH, PMEM_LEN, 
+			PMEM_FILE_CREATE,
+			0666, &mapped_len, &is_pmem)) == NULL) {
 		perror("pmem_map_file");
 		exit(1);
 	}
 
-	/* store a string to the persistent memory */
+	/* Store a string to the persistent memory */
 	strcpy(pmemaddr, "hello, persistent memory");
 
-	/* flush above strcpy to persistence */
+	/* Flush above strcpy to persistence */
 	if (is_pmem)
 		pmem_persist(pmemaddr, mapped_len);
 	else
