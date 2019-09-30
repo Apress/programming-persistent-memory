@@ -51,7 +51,7 @@ simple_copy: simple_copy.c
 	$(CC) -o simple_copy simple_copy.c -lpmem
 
 clean:
-	$(RM) *.o core a.out
+	$(RM) *.o core a.out *.lst
 
 clobber: clean
 	$(RM) full_copy manpage simple_copy *.lst

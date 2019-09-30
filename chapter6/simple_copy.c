@@ -66,8 +66,8 @@ main(int argc, char *argv[])
 	int cc;
 
 	if (argc != 3) {
-		fprintf(stderr, "usage: %s src-file dst-file
-			\n", argv[0]);
+		fprintf(stderr, 
+			"usage: %s src-file dst-file\n", argv[0]);
 		exit(1);
 	}
 
