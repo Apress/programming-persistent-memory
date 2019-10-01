@@ -32,7 +32,7 @@
 
 /*
  * pmem_detect_mind.c - Uses the automatic 'kind' 
- * 						detection API
+ *                         detection API
  */
 
 #include <memkind.h>
@@ -53,21 +53,21 @@ static void print_err_message(int err)
 {
     char error_message[MEMKIND_ERROR_MESSAGE_SIZE];
     memkind_error_message(err, error_message, 
-		MEMKIND_ERROR_MESSAGE_SIZE);
+        MEMKIND_ERROR_MESSAGE_SIZE);
     fprintf(stderr, "%s\n", error_message);
 }
 
 static int allocate_pmem_and_default_kind(
-	struct memkind *pmem_kind)
+    struct memkind *pmem_kind)
 {
     unsigned i;
     for(i = 0; i < ALLOC_LIMIT; i++) {
         if (i%2)
             alloc_buffer[i] = memkind_malloc(
-				pmem_kind, MALLOC_SIZE);
+                pmem_kind, MALLOC_SIZE);
         else
             alloc_buffer[i] = memkind_malloc(
-				MEMKIND_DEFAULT, MALLOC_SIZE);
+                MEMKIND_DEFAULT, MALLOC_SIZE);
 
         if (!alloc_buffer[i]) {
             return 1;
@@ -82,9 +82,9 @@ static int realloc_using_get_kind_only_on_pmem()
     unsigned i;
     for(i = 0; i < ALLOC_LIMIT; i++) {
         if (memkind_detect_kind(alloc_buffer[i]) != 
-				MEMKIND_DEFAULT) {
+                MEMKIND_DEFAULT) {
             void *temp = memkind_realloc(NULL, 
-				alloc_buffer[i], REALLOC_SIZE);
+                alloc_buffer[i], REALLOC_SIZE);
             if (!temp) {
                 return 1;
             }
@@ -97,20 +97,20 @@ static int realloc_using_get_kind_only_on_pmem()
 
 
 static int verify_allocation_size(
-	struct memkind *pmem_kind, size_t pmem_size)
+    struct memkind *pmem_kind, size_t pmem_size)
 {
     unsigned i;
     for(i = 0; i < ALLOC_LIMIT; i++) {
         void *val = alloc_buffer[i];
         if (i%2) {
             if (memkind_malloc_usable_size(pmem_kind,
-					 val) != pmem_size ) {
+                     val) != pmem_size ) {
                 return 1;
             }
         } else {
             if (memkind_malloc_usable_size(
-				MEMKIND_DEFAULT, val) != MALLOC_SIZE) 
-			{
+                MEMKIND_DEFAULT, val) != MALLOC_SIZE) 
+            {
                 return 1;
             }
         }
@@ -127,21 +127,21 @@ int main(int argc, char *argv[])
 
     if (argc > 2) {
         fprintf(stderr, 
-			"Usage: %s [pmem_kind_dir_path]\n", 
-			argv[0]);
+            "Usage: %s [pmem_kind_dir_path]\n", 
+            argv[0]);
         return 1;
     } else if (argc == 2 && (realpath(argv[1], path) 
-			== NULL)) {
+            == NULL)) {
         fprintf(stderr, 
-			"Incorrect pmem_kind_dir_path %s\n", 
-			argv[1]);
+            "Incorrect pmem_kind_dir_path %s\n", 
+            argv[1]);
         return 1;
     }
 
     fprintf(stdout,
             "This example shows how to distinguish "
-			"allocation from different kinds using "
-			"detect kind function"
+            "allocation from different kinds using "
+            "detect kind function"
             "\nPMEM kind directory: %s\n", path);
 
     err = memkind_create_pmem(path, 0, &pmem_kind);
@@ -151,38 +151,38 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, 
-		"Allocate to PMEM and DEFAULT kind.\n");
+        "Allocate to PMEM and DEFAULT kind.\n");
 
     if (allocate_pmem_and_default_kind(pmem_kind)) {
         fprintf(stderr, 
-			"allocate_pmem_and_default_kind().\n");
+            "allocate_pmem_and_default_kind().\n");
         return 1;
     }
 
     if (verify_allocation_size(pmem_kind, 
-			MALLOC_SIZE)) {
+            MALLOC_SIZE)) {
         fprintf(stderr, 
-			"verify_allocation_size() before "
-			"resize.\n");
+            "verify_allocation_size() before "
+            "resize.\n");
         return 1;
     }
 
     fprintf(stdout,
         "Reallocate memory only on PMEM kind using "
-		"memkind_detect_kind().\n");
+        "memkind_detect_kind().\n");
 
     if (realloc_using_get_kind_only_on_pmem()) {
         fprintf(stderr, 
-			"realloc_using_get_kind_only_on_pmem()."
-			"\n");
+            "realloc_using_get_kind_only_on_pmem()."
+            "\n");
         return 1;
     }
 
     if (verify_allocation_size(pmem_kind, 
-			REALLOC_SIZE)) {
+            REALLOC_SIZE)) {
         fprintf(stderr, 
-			"verify_allocation_size() after resize."
-			"\n");
+            "verify_allocation_size() after resize."
+            "\n");
         return 1;
     }
 
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "Memory from PMEM kind was "
-		"successfully reallocated.\n");
+        "successfully reallocated.\n");
 
     return 0;
 }
