@@ -31,7 +31,7 @@
  */
 
 /*
- * pmem_detect_mind.c - Uses the automatic 'kind' 
+ * pmem_detect_kind.c - Uses the automatic 'kind' 
  *                         detection API
  */
 

@@ -30,32 +30,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * pmem_allocator.cpp - Demonstrates using the 
- *                 pmem::allocator 
- *                         with std:vector.
+/* 
+ * vmemcache.c - This example uses a temporary file on a 
+ *               DAX-enabled file system and shows how a 
+ *               callback is registered after a cache miss 
+ *               for a key “meow.”
  */
 
-#include <pmem_allocator.h>
-#include <vector>
-#include <cassert>
- 
-int main(int argc, char *argv[]) {
-    const size_t pmem_max_size = 64*1024*1024; //64 MB
-    const std::string pmem_dir("/pmemfs/");
-    
-    // Create allocator object
-    libmemkind::pmem::allocator<int> alc(pmem_dir, 
-    pmem_max_size);
-    // Create std::vector with our allocator.
-    std::vector<int, libmemkind::pmem::allocator<int> 
-    > v(alc);
-    
-    for(int i = 0; i < 100; ++i)
-        v.push_back(i);
-    
-    for(int i = 0; i < 100; ++i)
-        assert(v[i] == i);
-    
-    return 0;
+#include <libvmemcache.h>
+#include <stdio.h>
+#include <string.h>
+
+#define STR_AND_LEN(x) (x), strlen(x)
+
+static VMEMcache *cache;
+
+static void on_miss(VMEMcache *cache, const void *key, 
+    size_t key_size, void *arg)
+{
+     vmemcache_put(cache, STR_AND_LEN("meow"),
+         STR_AND_LEN("Cthulhu fthagn"));
+}
+
+static void get(const char *key)
+{
+      char buf[128];
+      ssize_t len = vmemcache_get(cache, 
+        STR_AND_LEN(key), buf, sizeof(buf), 0, NULL);
+      if (len >= 0)
+           printf("%.*s\n", (int)len, buf);
+      else
+           printf("(key not found: %s)\n", key);
+}
+
+int main()
+{
+          cache = vmemcache_new();
+          if (vmemcache_add(cache, "/pmemfs")) {
+              fprintf(stderr, 
+                "error: vmemcache_add: %s\n",
+                  vmemcache_errormsg());
+              return 1;
+          }
+
+         /* Query a non-existent key. */
+         get("meow");
+
+         /* Insert then query. */
+          vmemcache_put(cache, STR_AND_LEN("bark"), 
+            STR_AND_LEN("Lorem ipsum"));
+          get("bark");
+
+        /* Install an on-miss handler. */
+          vmemcache_callback_on_miss(cache, on_miss, 0);
+          get("meow");
+
+          vmemcache_delete(cache);
+          return 0;
 }

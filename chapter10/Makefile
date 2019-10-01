@@ -32,25 +32,26 @@ CC = gcc
 CXX = g++
 RM = rm -f
 
-TARGETS = pmem_allocator vector_of_strings pmem_config pmem_detect_kind
+TARGETS = pmem_allocator vector_of_strings pmem_config pmem_detect_kind vmemcache
 TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
 
 all: $(TARGETS) listings
 listings: $(TARGETS_LISTINGS)
 
-%: %.cpp
-	$(CXX) -g -o $@ $< -lmemkind -std=c++11
-
 %.lst: %.cpp
 	sed -i 's/\t/    /g' $^
 	cat -n $^ > $@
 
-%: %.c
-	$(CC) -g -o $@ $< -lmemkind 
-
 %.lst: %.c
 	sed -i 's/\t/    /g' $^
 	cat -n $^ > $@
+
+%: %.cpp
+	$(CXX) -g -o $@ $< -lmemkind -std=c++11
+
+%: %.c
+	$(CC) -g -o $@ $< -lmemkind -lvmemcache
+
 clean:
 	$(RM) $(TARGETS) $(TARGETS_LISTINGS)
 
