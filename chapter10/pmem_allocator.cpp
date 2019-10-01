@@ -45,9 +45,11 @@ int main(int argc, char *argv[]) {
     const std::string pmem_dir("/pmemfs/");
     
     // Create allocator object
-    libmemkind::pmem::allocator<int> alc(pmem_dir, pmem_max_size);
+    libmemkind::pmem::allocator<int> alc(pmem_dir, 
+    pmem_max_size);
     // Create std::vector with our allocator.
-    std::vector<int, libmemkind:: pmem::allocator<int> > v(alc);
+    std::vector<int, libmemkind::pmem::allocator<int> 
+    > v(alc);
     
     for(int i = 0; i < 100; ++i)
         v.push_back(i);
