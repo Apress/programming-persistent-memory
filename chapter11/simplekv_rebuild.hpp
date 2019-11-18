@@ -49,9 +49,9 @@
 #include <string>
 #include <vector>
 
-#include "libpmemobj++/array.hpp"
-#include "libpmemobj++/string.hpp"
-#include "libpmemobj++/vector.hpp"
+#include <libpmemobj++/container/array.hpp>
+#include <libpmemobj++/container/string.hpp>
+#include <libpmemobj++/container/vector.hpp>
 
 template <typename Value, std::size_t N>
 struct simple_kv_persistent;

@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "libpmemobj++/array.hpp"
+#include "libpmemobj++/container/array.hpp"
 #include "libpmemobj++/pool.hpp"
 #include "libpmemobj++/transaction.hpp"
 
