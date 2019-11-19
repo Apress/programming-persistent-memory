@@ -45,9 +45,9 @@
 #include <stdexcept>
 #include <string>
 
-#include "libpmemobj++/array.hpp"
-#include "libpmemobj++/string.hpp"
-#include "libpmemobj++/vector.hpp"
+#include <libpmemobj++/container/array.hpp>
+#include <libpmemobj++/container/string.hpp>
+#include <libpmemobj++/container/vector.hpp>
 
 /**
  * Value - type of the value stored in hashmap
