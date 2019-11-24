@@ -49,7 +49,7 @@ int main()
 	pmem::obj::pool<root> pop;
 
 	try {
-		pop = pmem::obj::pool<root>::create("pmpool", "data_oriented",
+		pop = pmem::obj::pool<root>::create("/daxfs/pmpool", "data_oriented",
 						PMEMOBJ_MIN_POOL, 0666);
 
 		auto root = pop.root();

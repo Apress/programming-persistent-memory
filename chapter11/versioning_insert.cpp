@@ -96,7 +96,7 @@ int main()
 	pmem::obj::pool<array<int, 10>> pop;
 
 	try {
-		pop = pmem::obj::pool<array<int, 10>>::create("pmpool", "versioning_insert",
+		pop = pmem::obj::pool<array<int, 10>>::create("/daxfs/pmpool", "versioning_insert",
 						PMEMOBJ_MIN_POOL, 0666);
 
 		auto root = pop.root();
