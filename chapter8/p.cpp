@@ -52,7 +52,8 @@ struct root {
 };
 
 int main(int argc, char *argv[]) {
-	auto pop = pmem::obj::pool<root>::open("/dev/shm/file", "p");
+	// pool created using: pmempool create obj -s 8M -l p /daxfs/file
+	auto pop = pmem::obj::pool<root>::open("/daxfs/file", "p");
 
 	auto r = pop.root();
 

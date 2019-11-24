@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017, Intel Corporation
+ * Copyright 2015-2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,11 +31,12 @@
  */
 
 /*
- * preader.c - 	Read a string from a 
- * 		persistent memory pool 
+ * preader.c - 	Read a string from a
+ * 		persistent memory pool
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <libpmemobj.h>
 
@@ -51,8 +52,8 @@ int
 main(int argc, char *argv[])
 {
 	if (argc != 2) {
-		printf("usage: %s file-name\n", argv[0]);
-		return 1;
+		fprintf(stderr, "usage: %s file-name\n", argv[0]);
+		exit(1);
 	}
 
 	PMEMobjpool *pop = pmemobj_open(argv[1], 
@@ -60,7 +61,7 @@ main(int argc, char *argv[])
 
 	if (pop == NULL) {
 		perror("pmemobj_open");
-		return 1;
+		exit(1);
 	}
 
 	PMEMoid root = pmemobj_root(pop, 
@@ -72,5 +73,5 @@ main(int argc, char *argv[])
 
 	pmemobj_close(pop);
 
-	return 0;
+	exit(0);
 }
