@@ -34,7 +34,7 @@
 #include <libpmemobj++/transaction.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
 #include <libpmemobj++/pool.hpp>
-#include "libpmemobj++/vector.hpp"
+#include <libpmemobj++/container/vector.hpp>
 
 using vector_type = pmem::obj::vector<int>;
 
