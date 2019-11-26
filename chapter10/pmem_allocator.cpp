@@ -31,31 +31,30 @@
  */
 
 /*
- * pmem_allocator.cpp - Demonstrates using the 
- *                 pmem::allocator 
- *                         with std:vector.
+ * pmem_allocator.cpp - pmem::allocator with std:vector
  */
 
 #include <pmem_allocator.h>
 #include <vector>
 #include <cassert>
- 
+
 int main(int argc, char *argv[]) {
-    const size_t pmem_max_size = 64*1024*1024; //64 MB
-    const std::string pmem_dir("/pmemfs/");
-    
-    // Create allocator object
-    libmemkind::pmem::allocator<int> alc(pmem_dir, 
-    pmem_max_size);
-    // Create std::vector with our allocator.
-    std::vector<int, libmemkind::pmem::allocator<int> 
-    > v(alc);
-    
-    for(int i = 0; i < 100; ++i)
-        v.push_back(i);
-    
-    for(int i = 0; i < 100; ++i)
-        assert(v[i] == i);
-    
-    return 0;
+	const size_t pmem_max_size = 64 * 1024 * 1024; //64 MB
+	const std::string pmem_dir("/daxfs");
+
+	// Create allocator object
+	libmemkind::pmem::allocator<int>
+		alc(pmem_dir, pmem_max_size);
+
+	// Create std::vector with our allocator.
+	std::vector<int,
+		libmemkind::pmem::allocator<int>> v(alc);
+
+	for (int i = 0; i < 100; ++i)
+		v.push_back(i);
+
+	for (int i = 0; i < 100; ++i)
+		assert(v[i] == i);
+
+	exit(0);
 }

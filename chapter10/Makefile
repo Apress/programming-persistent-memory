@@ -28,9 +28,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-CC = gcc
-CXX = g++
-RM = rm -f
+#
+# Makefile for chapter10 examples
+#
 
 TARGETS = pmem_allocator vector_of_strings pmem_config pmem_detect_kind vmemcache
 TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
@@ -39,12 +39,10 @@ all: $(TARGETS) listings
 listings: $(TARGETS_LISTINGS)
 
 %.lst: %.cpp
-	sed -i 's/\t/    /g' $^
-	cat -n $^ > $@
+	expand -t 4 < $^ | cat -n > $@
 
 %.lst: %.c
-	sed -i 's/\t/    /g' $^
-	cat -n $^ > $@
+	expand -t 4 < $^ | cat -n > $@
 
 %: %.cpp
 	$(CXX) -g -o $@ $< -lmemkind -std=c++11
@@ -53,5 +51,9 @@ listings: $(TARGETS_LISTINGS)
 	$(CC) -g -o $@ $< -lmemkind -lvmemcache
 
 clean:
+	$(RM) *.o core a.out
+
+clobber: clean
 	$(RM) $(TARGETS) $(TARGETS_LISTINGS)
 
+.PHONY: all clean clobber listings

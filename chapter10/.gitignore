@@ -1,0 +1,5 @@
+pmem_allocator
+pmem_config
+pmem_detect_kind
+vector_of_strings
+vmemcache

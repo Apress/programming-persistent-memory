@@ -30,60 +30,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* 
- * vmemcache.c - This example uses a temporary file 
- * 		 on a DAX-enabled file system and 
- * 		 shows how a callback is registered 
- * 		 after a cache miss for a key “meow.”
+/*
+ * vmemcache.c - example showing how to vmemcahe is used
  */
 
 #include <libvmemcache.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define STR_AND_LEN(x) (x), strlen(x)
 
-static VMEMcache *cache;
+VMEMcache *cache;
 
-static void on_miss(VMEMcache *cache, const void *key, 
+void on_miss(VMEMcache *cache, const void *key,
     size_t key_size, void *arg)
 {
 	vmemcache_put(cache, STR_AND_LEN("meow"),
-         STR_AND_LEN("Cthulhu fthagn"));
+		STR_AND_LEN("Cthulhu fthagn"));
 }
 
-static void get(const char *key)
+void get(const char *key)
 {
 	char buf[128];
-	ssize_t len = vmemcache_get(cache, 
+	ssize_t len = vmemcache_get(cache,
 	STR_AND_LEN(key), buf, sizeof(buf), 0, NULL);
 	if (len >= 0)
-    	printf("%.*s\n", (int)len, buf);
-    else
-    	printf("(key not found: %s)\n", key);
+		printf("%.*s\n", (int)len, buf);
+	else
+		printf("(key not found: %s)\n", key);
 }
 
 int main()
 {
 	cache = vmemcache_new();
-    if (vmemcache_add(cache, "/pmemfs")) {
-    	fprintf(stderr, "error: vmemcache_add: %s\n",
-        		vmemcache_errormsg());
-            return 1;
+	if (vmemcache_add(cache, "/daxfs")) {
+		fprintf(stderr, "error: vmemcache_add: %s\n",
+			vmemcache_errormsg());
+		exit(1);
 	}
 
-	/* Query a non-existent key. */
+	// Query a non-existent key
 	get("meow");
 
-	/* Insert then query. */
-	vmemcache_put(cache, STR_AND_LEN("bark"), 
+	// Insert then query
+	vmemcache_put(cache, STR_AND_LEN("bark"),
 		STR_AND_LEN("Lorem ipsum"));
 	get("bark");
 
-	/* Install an on-miss handler. */
+	// Install an on-miss handler
 	vmemcache_callback_on_miss(cache, on_miss, 0);
 	get("meow");
 
 	vmemcache_delete(cache);
-	return 0;
+
+	exit(0);
 }
