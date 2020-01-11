@@ -1,0 +1,13 @@
+PS C:\Users\Administrator> Get-PmemDisk
+
+Number Size   Health  Atomicity Removable Physical device IDs Unsafe shutdowns
+------ ----   ------  --------- --------- ------------------- ----------------
+2      249 GB Healthy None      True      {1}                 36
+
+
+PS C:\Users\Administrator> Get-Disk 2 | Get-Partition
+
+PartitionNumber  DriveLetter Offset   Size      Type
+---------------  ----------- ------   ----      ----
+1                            24576    15.98 MB  Reserved
+2                D           16777216 248.98 GB Basic
