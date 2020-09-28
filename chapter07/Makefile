@@ -34,7 +34,7 @@ CC = gcc
 CXX = g++
 RM = rm -f
 
-TARGETS = pwriter preader pmemobj_alloc.c reserve_publish.c  tx.c
+TARGETS = pwriter preader pmemobj_alloc reserve_publish tx
 TARGETS_LISTINGS = $(addsuffix .lst, $(TARGETS))
 
 LIBS = -lpmemobj -lpmem -lpthread
