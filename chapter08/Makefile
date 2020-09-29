@@ -29,7 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #
-# Makefile for chapter1 examples
+# Makefile for chapter8 examples
 #
 
 .SUFFIXES: .lst
@@ -45,25 +45,25 @@ listings: transaction.lst p.lst allocation.lst non_trivial_copy.lst volatile_poi
 	cat -n $^ > $@
 
 transaction: transaction.cpp
-	$(CXX) -o transaction transaction.cpp -lpmemobj
+	$(CXX) -std=c++11 -o transaction transaction.cpp -lpmemobj
 
 p: p.cpp
-	$(CXX) -o p p.cpp -lpmemobj
+	$(CXX) -std=c++11 -o p p.cpp -lpmemobj
 
 allocation: allocation.cpp
-	$(CXX) -o allocation allocation.cpp -lpmemobj
+	$(CXX) -std=c++11 -o allocation allocation.cpp -lpmemobj
 
 non_trivial_copy: non_trivial_copy.cpp
-	$(CXX) -c -o non_trivial_copy non_trivial_copy.cpp
+	$(CXX) -std=c++11 -c -o non_trivial_copy non_trivial_copy.cpp
 
 volatile_pointers: volatile_pointers.cpp
-	$(CXX) -c -o volatile_pointers volatile_pointers.cpp
+	$(CXX) -std=c++11 -c -o volatile_pointers volatile_pointers.cpp
 
 queue: queue.cpp
-	$(CXX) -o queue queue.cpp -lpmemobj
+	$(CXX) -std=c++11 -o queue queue.cpp -lpmemobj
 
 containers: containers.cpp
-	$(CXX) -o containers containers.cpp -lpmemobj
+	$(CXX) -std=c++11 -o containers containers.cpp -lpmemobj
 
 clean:
 	$(RM) *.o core a.out
