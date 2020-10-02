@@ -42,10 +42,10 @@ listings: config_structure.lst phonebook.lst
 	cat -n $^ > $@
 
 config_structure: config_structure.c
-	$(CXX) -o config_structure config_structure.c -lpmemkv
+	$(CXX) -std=c++11 -o config_structure config_structure.c -lpmemkv
 
 phonebook: phonebook.cpp
-	$(CXX) -o phonebook phonebook.cpp -lpmemkv
+	$(CXX) -std=c++11 -o phonebook phonebook.cpp -lpmemkv
 
 clean:
 	$(RM) *.o core a.out
