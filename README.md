@@ -1,6 +1,6 @@
 # Apress Source Code
 
-This repository accompanies *Programming Persistent Memory - A Comprehensive Guide for Developers* by Steve Scargall (Apress, 2020).
+The given repository accompanies *Programming Persistent Memory - A Comprehensive Guide for Developers* by Steve Scargall (Apress, 2020).
 
 [comment]: #cover
 ![Cover image](FrontCover.png)
