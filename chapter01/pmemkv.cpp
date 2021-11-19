@@ -85,21 +85,21 @@ int main() {
 
 	// open the key-value store, using the cmap engine
 	if (kv->open("cmap", std::move(cfg)) != status::OK) {
-		cerr << db::errormsg() << endl;
+		cerr << kv->errormsg() << endl;
 		exit(1);
 	}
 
 	// add some keys and values
 	if (kv->put("key1", "value1") != status::OK) {
-		cerr << db::errormsg() << endl;
+		cerr << kv->errormsg() << endl;
 		exit(1);
 	}
 	if (kv->put("key2", "value2") != status::OK) {
-		cerr << db::errormsg() << endl;
+		cerr << kv->errormsg() << endl;
 		exit(1);
 	}
 	if (kv->put("key3", "value3") != status::OK) {
-		cerr << db::errormsg() << endl;
+		cerr << kv->errormsg() << endl;
 		exit(1);
 	}
 

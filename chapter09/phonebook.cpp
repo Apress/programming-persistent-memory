@@ -55,24 +55,24 @@ int main() {
     db kv;
 
     if (kv.open("cmap", config(cfg)) != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
 
     // Add 2 entries with name and phone number
     if (kv.put("John", "123-456-789") != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
     if (kv.put("Kate", "987-654-321") != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
 
     // Count elements
     size_t cnt;
     if (kv.count_all(cnt) != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
     assert(cnt == 2);
@@ -80,7 +80,7 @@ int main() {
     // Read key back
     std::string number;
     if (kv.get("John", &number) != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
     assert(number == "123-456-789");
@@ -91,13 +91,13 @@ int main() {
             ", number: " << number.data() << std::endl;
             return 0;
             }) != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
 
     // Remove one record
     if (kv.remove("John") != status::OK) {
-        std::cerr << db::errormsg() << std::endl;
+        std::cerr << kv.errormsg() << std::endl;
         return 1;
     }
 
